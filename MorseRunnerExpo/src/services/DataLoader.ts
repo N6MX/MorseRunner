@@ -17,14 +17,96 @@ class DataLoader {
     }
 
     try {
-      // In a real React Native app, you would load from bundled assets
-      // For now, we'll use sample data based on the contest type
-      const data = this.generateSampleData(filename);
-      this.dataCache.set(filename, data);
-      return data;
+      // Try to load real data first
+      const realData = await this.loadRealData(filename);
+      if (realData.length > 0) {
+        this.dataCache.set(filename, realData);
+        return realData;
+      }
+      
+      // Fallback to sample data if real data loading fails
+      const sampleData = this.generateSampleData(filename);
+      this.dataCache.set(filename, sampleData);
+      return sampleData;
     } catch (error) {
       console.error(`Error loading contest data from ${filename}:`, error);
+      // Return sample data as fallback
+      const sampleData = this.generateSampleData(filename);
+      this.dataCache.set(filename, sampleData);
+      return sampleData;
+    }
+  }
+
+  // Load real data from bundled assets
+  private async loadRealData(filename: string): Promise<ContestCall[]> {
+    try {
+      // In Expo, we need to use a different approach to load bundled files
+      // For now, we'll use a fetch approach with the asset path
+      const response = await fetch(`./assets/data/${filename}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${filename}: ${response.status}`);
+      }
+      const text = await response.text();
+      return this.parseCallHistory(text, filename);
+    } catch (error) {
+      console.warn(`Could not load real data from ${filename}, using sample data:`, error);
       return [];
+    }
+  }
+
+  // Parse call history from text data
+  private parseCallHistory(data: string, filename: string): ContestCall[] {
+    const lines = data.split('\n').filter(line => line.trim());
+    const calls: ContestCall[] = [];
+
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        // Parse different formats based on filename
+        const call = this.parseCallFromLine(trimmedLine, filename);
+        if (call) {
+          calls.push(call);
+        }
+      }
+    }
+
+    return calls;
+  }
+
+  // Parse individual call from line
+  private parseCallFromLine(line: string, filename: string): ContestCall | null {
+    try {
+      // Basic parsing - this would be more sophisticated in a real implementation
+      const parts = line.split(/\s+/);
+      if (parts.length < 1) return null;
+
+      const call = parts[0].trim();
+      if (!call || call.length < 3) return null;
+
+      // Generate exchange data based on filename
+      let exchange1 = '599';
+      let exchange2 = '001';
+
+      if (filename.includes('CQWW') || filename.includes('WPX')) {
+        exchange1 = '599';
+        exchange2 = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      } else if (filename.includes('FieldDay') || filename.includes('FDGOTA')) {
+        exchange1 = '3A';
+        exchange2 = 'OR';
+      } else if (filename.includes('SST')) {
+        exchange1 = '599';
+        exchange2 = '001';
+      }
+
+      return {
+        call,
+        exchange1,
+        exchange2,
+        userText: ''
+      };
+    } catch (error) {
+      console.warn('Error parsing call from line:', line, error);
+      return null;
     }
   }
 

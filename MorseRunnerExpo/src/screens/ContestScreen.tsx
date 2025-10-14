@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import ContestManager from '../services/ContestManager';
 import AudioEngine from '../services/AudioEngine';
+import SettingsService from '../services/SettingsService';
 import { ContestType } from '../data/Contest';
 import { StationMessage } from '../data/Station';
 
@@ -26,9 +27,32 @@ const ContestScreen: React.FC = () => {
   const [myCall, setMyCall] = useState('VE3NEA');
   const [activity, setActivity] = useState(3);
   const [duration, setDuration] = useState(30);
+  const [settings, setSettings] = useState(SettingsService.getSettings());
 
   useEffect(() => {
-    // Initialize contest
+    // Load settings on component mount
+    const loadSettings = async () => {
+      await SettingsService.loadSettings();
+      const currentSettings = SettingsService.getSettings();
+      setSettings(currentSettings);
+      setMyCall(currentSettings.myCall);
+      setActivity(currentSettings.activity);
+      setDuration(currentSettings.duration);
+      setSelectedContest(currentSettings.selectedContest);
+    };
+    
+    loadSettings();
+
+    // Subscribe to settings changes
+    const unsubscribe = SettingsService.subscribe((newSettings) => {
+      setSettings(newSettings);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    // Initialize contest when settings change
     ContestManager.setContest(selectedContest);
     ContestManager.setMyCall(myCall);
     ContestManager.setActivity(activity);
@@ -72,6 +96,29 @@ const ContestScreen: React.FC = () => {
     setNumber('');
   };
 
+  // Settings change handlers
+  const handleMyCallChange = async (value: string) => {
+    setMyCall(value);
+    await SettingsService.updateSetting('myCall', value);
+  };
+
+  const handleActivityChange = async (value: string) => {
+    const numValue = parseInt(value) || 3;
+    setActivity(numValue);
+    await SettingsService.updateSetting('activity', numValue);
+  };
+
+  const handleDurationChange = async (value: string) => {
+    const numValue = parseInt(value) || 30;
+    setDuration(numValue);
+    await SettingsService.updateSetting('duration', numValue);
+  };
+
+  const handleContestChange = async (contest: ContestType) => {
+    setSelectedContest(contest);
+    await SettingsService.updateSetting('selectedContest', contest);
+  };
+
   // Contest selection
   const availableContests = ContestManager.getAvailableContests();
 
@@ -88,7 +135,7 @@ const ContestScreen: React.FC = () => {
                 styles.contestButton,
                 selectedContest === contest.type && styles.contestButtonSelected
               ]}
-              onPress={() => setSelectedContest(contest.type)}
+              onPress={() => handleContestChange(contest.type)}
             >
               <Text style={[
                 styles.contestButtonText,
@@ -108,7 +155,7 @@ const ContestScreen: React.FC = () => {
           <TextInput
             style={styles.input}
             value={myCall}
-            onChangeText={setMyCall}
+            onChangeText={handleMyCallChange}
             placeholder="VE3NEA"
           />
         </View>
@@ -117,7 +164,7 @@ const ContestScreen: React.FC = () => {
           <TextInput
             style={styles.input}
             value={activity.toString()}
-            onChangeText={(text) => setActivity(parseInt(text) || 3)}
+            onChangeText={handleActivityChange}
             keyboardType="numeric"
           />
         </View>
@@ -126,7 +173,7 @@ const ContestScreen: React.FC = () => {
           <TextInput
             style={styles.input}
             value={duration.toString()}
-            onChangeText={(text) => setDuration(parseInt(text) || 30)}
+            onChangeText={handleDurationChange}
             keyboardType="numeric"
           />
         </View>
