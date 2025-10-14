@@ -1,0 +1,113 @@
+// Data loader service for contest data files
+export interface ContestCall {
+  call: string;
+  exchange1: string;
+  exchange2: string;
+  userText: string;
+}
+
+class DataLoader {
+  private dataCache: Map<string, ContestCall[]> = new Map();
+
+  // Load contest data from file
+  async loadContestData(filename: string): Promise<ContestCall[]> {
+    // Check cache first
+    if (this.dataCache.has(filename)) {
+      return this.dataCache.get(filename)!;
+    }
+
+    try {
+      // In a real React Native app, you would load from bundled assets
+      // For now, we'll use sample data based on the contest type
+      const data = this.generateSampleData(filename);
+      this.dataCache.set(filename, data);
+      return data;
+    } catch (error) {
+      console.error(`Error loading contest data from ${filename}:`, error);
+      return [];
+    }
+  }
+
+  private generateSampleData(filename: string): ContestCall[] {
+    // Generate sample data based on the filename
+    const sampleData: ContestCall[] = [];
+    
+    // Generate 100 sample callsigns
+    for (let i = 1; i <= 100; i++) {
+      const call = this.generateCallSign();
+      const exchange1 = this.generateExchange1(filename);
+      const exchange2 = this.generateExchange2(filename);
+      
+      sampleData.push({
+        call,
+        exchange1,
+        exchange2,
+        userText: ''
+      });
+    }
+
+    return sampleData;
+  }
+
+  private generateCallSign(): string {
+    const prefixes = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W0'];
+    const suffixes = ['ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'STU', 'VWX', 'YZ'];
+    
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    
+    return `${prefix}${suffix}`;
+  }
+
+  private generateExchange1(filename: string): string {
+    if (filename.includes('CQWW') || filename.includes('WPX')) {
+      return '599';
+    } else if (filename.includes('FieldDay') || filename.includes('FDGOTA')) {
+      const classes = ['1A', '2A', '3A', '4A', '5A', '6A', '7A', '8A', '9A'];
+      return classes[Math.floor(Math.random() * classes.length)];
+    } else if (filename.includes('SST')) {
+      const names = ['DAVID', 'JOHN', 'MARY', 'TOM', 'SARA', 'MIKE', 'LISA', 'BOB'];
+      return names[Math.floor(Math.random() * names.length)];
+    }
+    return '599';
+  }
+
+  private generateExchange2(filename: string): string {
+    if (filename.includes('CQWW')) {
+      return (Math.floor(Math.random() * 40) + 1).toString();
+    } else if (filename.includes('WPX')) {
+      return (Math.floor(Math.random() * 999) + 1).toString().padStart(3, '0');
+    } else if (filename.includes('FieldDay') || filename.includes('FDGOTA')) {
+      const sections = ['OR', 'CA', 'WA', 'TX', 'FL', 'NY', 'IL', 'PA', 'OH', 'MI'];
+      return sections[Math.floor(Math.random() * sections.length)];
+    } else if (filename.includes('SST')) {
+      const sections = ['OR', 'CA', 'WA', 'TX', 'FL', 'NY', 'IL', 'PA', 'OH', 'MI'];
+      return sections[Math.floor(Math.random() * sections.length)];
+    }
+    return '001';
+  }
+
+  // Load specific contest data
+  async loadCQWWData(): Promise<ContestCall[]> {
+    return this.loadContestData('CQWWCW.txt');
+  }
+
+  async loadWPXData(): Promise<ContestCall[]> {
+    return this.loadContestData('CQWWCW.txt'); // Using CQWW data for now
+  }
+
+  async loadFieldDayData(): Promise<ContestCall[]> {
+    return this.loadContestData('FDGOTA.txt');
+  }
+
+  async loadSSTData(): Promise<ContestCall[]> {
+    return this.loadContestData('SST.txt');
+  }
+
+  // Clear cache
+  clearCache(): void {
+    this.dataCache.clear();
+  }
+}
+
+export default new DataLoader();
