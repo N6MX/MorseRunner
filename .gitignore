@@ -108,3 +108,9 @@ MorseRunner.stat
 
 # Ignore my project's .ini file. This user file is regenerated at runtime.
 MorseRunner.ini
+
+# Mobile development files
+MorseRunnerMobile/
+node_modules/
+.expo/
+*.log
