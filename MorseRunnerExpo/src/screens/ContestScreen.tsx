@@ -12,8 +12,12 @@ import {
 import ContestManager from '../services/ContestManager';
 import AudioEngine from '../services/AudioEngine';
 import SettingsService from '../services/SettingsService';
+import ContestSimulator from '../services/ContestSimulator';
+import StationList from '../components/StationList';
+import AudioControls from '../components/AudioControls';
 import { ContestType } from '../data/Contest';
 import { StationMessage } from '../data/Station';
+import { SimulatedStation, ContestStats } from '../services/ContestSimulator';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,6 +32,17 @@ const ContestScreen: React.FC = () => {
   const [activity, setActivity] = useState(3);
   const [duration, setDuration] = useState(30);
   const [settings, setSettings] = useState(SettingsService.getSettings());
+  const [simulatedStations, setSimulatedStations] = useState<SimulatedStation[]>([]);
+  const [contestStats, setContestStats] = useState<ContestStats>({
+    qsos: 0,
+    points: 0,
+    multipliers: 0,
+    score: 0,
+    rate: 0,
+    startTime: 0,
+    endTime: 0
+  });
+  const [showAudioControls, setShowAudioControls] = useState(false);
 
   useEffect(() => {
     // Load settings on component mount
@@ -44,11 +59,20 @@ const ContestScreen: React.FC = () => {
     loadSettings();
 
     // Subscribe to settings changes
-    const unsubscribe = SettingsService.subscribe((newSettings) => {
+    const unsubscribeSettings = SettingsService.subscribe((newSettings) => {
       setSettings(newSettings);
     });
 
-    return unsubscribe;
+    // Subscribe to contest simulator updates
+    const unsubscribeSimulator = ContestSimulator.subscribe((stations, stats) => {
+      setSimulatedStations(stations);
+      setContestStats(stats);
+    });
+
+    return () => {
+      unsubscribeSettings();
+      unsubscribeSimulator();
+    };
   }, []);
 
   useEffect(() => {
@@ -64,18 +88,23 @@ const ContestScreen: React.FC = () => {
     try {
       const myStation = ContestManager.getMyStation();
       await ContestManager.sendMessage(myStation, message);
+      
+      // Notify the contest simulator about the user's message
+      ContestSimulator.onUserMessage(message);
     } catch (error) {
       console.error('Error sending message:', error);
     }
   };
 
   // Start/Stop contest
-  const toggleContest = () => {
+  const toggleContest = async () => {
     if (isRunning) {
       ContestManager.stopContest();
+      ContestSimulator.stopContest();
       setIsRunning(false);
     } else {
       ContestManager.startContest();
+      await ContestSimulator.startContest(selectedContest, myCall, activity);
       setIsRunning(true);
     }
   };
@@ -94,6 +123,12 @@ const ContestScreen: React.FC = () => {
     setCallSign('');
     setRst('');
     setNumber('');
+  };
+
+  // Handle completing QSO with simulated station
+  const handleCompleteQSO = (stationId: string) => {
+    ContestSimulator.completeQSO(stationId);
+    console.log(`QSO completed with station ${stationId}`);
   };
 
   // Settings change handlers
@@ -123,187 +158,200 @@ const ContestScreen: React.FC = () => {
   const availableContests = ContestManager.getAvailableContests();
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Contest Selection */}
-      <View style={styles.contestSelector}>
-        <Text style={styles.label}>Contest:</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {availableContests.map((contest) => (
-            <TouchableOpacity
-              key={contest.type}
-              style={[
-                styles.contestButton,
-                selectedContest === contest.type && styles.contestButtonSelected
-              ]}
-              onPress={() => handleContestChange(contest.type)}
-            >
-              <Text style={[
-                styles.contestButtonText,
-                selectedContest === contest.type && styles.contestButtonTextSelected
-              ]}>
-                {contest.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Contest Selection */}
+        <View style={styles.contestSelector}>
+          <Text style={styles.label}>Contest:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {availableContests.map((contest) => (
+              <TouchableOpacity
+                key={contest.type}
+                style={[
+                  styles.contestButton,
+                  selectedContest === contest.type && styles.contestButtonSelected
+                ]}
+                onPress={() => handleContestChange(contest.type)}
+              >
+                <Text style={[
+                  styles.contestButtonText,
+                  selectedContest === contest.type && styles.contestButtonTextSelected
+                ]}>
+                  {contest.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      {/* Settings */}
-      <View style={styles.settings}>
-        <View style={styles.settingRow}>
-          <Text style={styles.label}>My Call:</Text>
-          <TextInput
-            style={styles.input}
-            value={myCall}
-            onChangeText={handleMyCallChange}
-            placeholder="VE3NEA"
-          />
-        </View>
-        <View style={styles.settingRow}>
-          <Text style={styles.label}>Activity:</Text>
-          <TextInput
-            style={styles.input}
-            value={activity.toString()}
-            onChangeText={handleActivityChange}
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.settingRow}>
-          <Text style={styles.label}>Duration:</Text>
-          <TextInput
-            style={styles.input}
-            value={duration.toString()}
-            onChangeText={handleDurationChange}
-            keyboardType="numeric"
-          />
-        </View>
-      </View>
-
-      {/* Input Fields */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.sectionLabel}>QSO Entry</Text>
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.inputField}
-            placeholder="Call"
-            value={callSign}
-            onChangeText={setCallSign}
-          />
-          <TextInput
-            style={styles.inputField}
-            placeholder="RST"
-            value={rst}
-            onChangeText={setRst}
-          />
-          <TextInput
-            style={styles.inputField}
-            placeholder="Nr."
-            value={number}
-            onChangeText={setNumber}
-          />
-        </View>
-      </View>
-
-      {/* Function Keys */}
-      <View style={styles.functionKeysContainer}>
-        <Text style={styles.sectionLabel}>Function Keys</Text>
-        <View style={styles.functionKeys}>
-          {/* Row 1 */}
-          <View style={styles.functionKeyRow}>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.CQ)}
-            >
-              <Text style={styles.functionKeyText}>F1 CQ</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.NR)}
-            >
-              <Text style={styles.functionKeyText}>F2 {'<#>}'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.TU)}
-            >
-              <Text style={styles.functionKeyText}>F3 TU</Text>
-            </TouchableOpacity>
+        {/* Settings */}
+        <View style={styles.settings}>
+          <View style={styles.settingRow}>
+            <Text style={styles.label}>My Call:</Text>
+            <TextInput
+              style={styles.input}
+              value={myCall}
+              onChangeText={handleMyCallChange}
+              placeholder="VE3NEA"
+            />
           </View>
-          
-          {/* Row 2 */}
-          <View style={styles.functionKeyRow}>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.MY_CALL)}
-            >
-              <Text style={styles.functionKeyText}>F4 {'<my>'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.HIS_CALL)}
-            >
-              <Text style={styles.functionKeyText}>F5 {'<his>'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.B4)}
-            >
-              <Text style={styles.functionKeyText}>F6 B4</Text>
-            </TouchableOpacity>
+          <View style={styles.settingRow}>
+            <Text style={styles.label}>Activity:</Text>
+            <TextInput
+              style={styles.input}
+              value={activity.toString()}
+              onChangeText={handleActivityChange}
+              keyboardType="numeric"
+            />
           </View>
-          
-          {/* Row 3 */}
-          <View style={styles.functionKeyRow}>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.QM)}
-            >
-              <Text style={styles.functionKeyText}>F7 ?</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.functionKey}
-              onPress={() => handleFunctionKey(StationMessage.NIL)}
-            >
-              <Text style={styles.functionKeyText}>F8 NIL</Text>
-            </TouchableOpacity>
-            <View style={styles.functionKeySpacer} />
+          <View style={styles.settingRow}>
+            <Text style={styles.label}>Duration:</Text>
+            <TextInput
+              style={styles.input}
+              value={duration.toString()}
+              onChangeText={handleDurationChange}
+              keyboardType="numeric"
+            />
           </View>
         </View>
-      </View>
 
-      {/* Control Buttons */}
-      <View style={styles.controlButtons}>
-        <TouchableOpacity
-          style={[styles.controlButton, isRunning ? styles.stopButton : styles.startButton]}
-          onPress={toggleContest}
-        >
-          <Text style={styles.controlButtonText}>
-            {isRunning ? 'Stop' : 'Start'}
+        {/* Input Fields */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.sectionLabel}>QSO Entry</Text>
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Call"
+              value={callSign}
+              onChangeText={setCallSign}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="RST"
+              value={rst}
+              onChangeText={setRst}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Nr."
+              value={number}
+              onChangeText={setNumber}
+            />
+          </View>
+        </View>
+
+        {/* Function Keys */}
+        <View style={styles.functionKeysContainer}>
+          <Text style={styles.sectionLabel}>Function Keys</Text>
+          <View style={styles.functionKeys}>
+            {/* Row 1 */}
+            <View style={styles.functionKeyRow}>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.CQ)}
+              >
+                <Text style={styles.functionKeyText}>F1 CQ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.NR)}
+              >
+                <Text style={styles.functionKeyText}>F2 {'<#>}'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.TU)}
+              >
+                <Text style={styles.functionKeyText}>F3 TU</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Row 2 */}
+            <View style={styles.functionKeyRow}>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.MY_CALL)}
+              >
+                <Text style={styles.functionKeyText}>F4 {'<my>'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.HIS_CALL)}
+              >
+                <Text style={styles.functionKeyText}>F5 {'<his>'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.B4)}
+              >
+                <Text style={styles.functionKeyText}>F6 B4</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Row 3 */}
+            <View style={styles.functionKeyRow}>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.QM)}
+              >
+                <Text style={styles.functionKeyText}>F7 ?</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.functionKey}
+                onPress={() => handleFunctionKey(StationMessage.NIL)}
+              >
+                <Text style={styles.functionKeyText}>F8 NIL</Text>
+              </TouchableOpacity>
+              <View style={styles.functionKeySpacer} />
+            </View>
+          </View>
+        </View>
+
+        {/* Control Buttons */}
+        <View style={styles.controlButtons}>
+          <TouchableOpacity
+            style={[styles.controlButton, isRunning ? styles.stopButton : styles.startButton]}
+            onPress={toggleContest}
+          >
+            <Text style={styles.controlButtonText}>
+              {isRunning ? 'Stop' : 'Start'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.controlButton}
+            onPress={saveQSO}
+          >
+            <Text style={styles.controlButtonText}>Save QSO</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.controlButton, styles.audioButton]}
+            onPress={() => setShowAudioControls(true)}
+          >
+            <Text style={styles.controlButtonText}>Audio</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Contest Simulation */}
+        <StationList
+          stations={simulatedStations}
+          stats={contestStats}
+          onCompleteQSO={handleCompleteQSO}
+        />
+
+        {/* Score Display */}
+        <View style={styles.scoreContainer}>
+          <Text style={styles.scoreText}>
+            Pts: {contestStats.points} | Mult: {contestStats.multipliers} | Score: {contestStats.score}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={saveQSO}
-        >
-          <Text style={styles.controlButtonText}>Save QSO</Text>
-        </TouchableOpacity>
-      </View>
+        </View>
+      </ScrollView>
 
-      {/* Contest Log */}
-      <View style={styles.logContainer}>
-        <Text style={styles.logHeader}>Contest Log</Text>
-        <Text style={styles.logPlaceholder}>
-          QSOs will appear here during the contest
-        </Text>
-      </View>
-
-      {/* Score Display */}
-      <View style={styles.scoreContainer}>
-        <Text style={styles.scoreText}>
-          Pts: {score.points} | Mult: {score.mults} | Score: {score.total}
-        </Text>
-      </View>
-    </ScrollView>
+      {/* Audio Controls Modal - Outside ScrollView */}
+      <AudioControls
+        isVisible={showAudioControls}
+        onClose={() => setShowAudioControls(false)}
+      />
+    </View>
   );
 };
 
@@ -311,6 +359,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
+  },
+  scrollView: {
+    flex: 1,
   },
   contestSelector: {
     backgroundColor: 'white',
@@ -476,6 +527,9 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: '#f44336',
+  },
+  audioButton: {
+    backgroundColor: '#9C27B0',
   },
   controlButtonText: {
     color: 'white',

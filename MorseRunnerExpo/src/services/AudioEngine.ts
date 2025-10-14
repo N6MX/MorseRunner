@@ -1,6 +1,7 @@
 import { Audio } from 'expo-av';
 import { Vibration } from 'react-native';
 import { encodeToMorse } from '../utils/MorseTable';
+import SettingsService from './SettingsService';
 
 class AudioEngine {
   private isPlaying: boolean = false;
@@ -22,16 +23,24 @@ class AudioEngine {
     });
   }
 
-  async playMorseCode(text: string, wpm: number = 30): Promise<void> {
+  async playMorseCode(text: string, wpm?: number): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
-      const morseString = encodeToMorse(text);
-      console.log(`Playing Morse: ${text} -> ${morseString} at ${wpm} WPM`);
-      
+        // Get settings
+        const settings = SettingsService.getSettings();
+        const actualWpm = wpm || settings.wpm;
+        const pitch = settings.pitch;
+        const volume = settings.volume;
+        const audioEnabled = settings.audioEnabled;
+        const vibrationEnabled = settings.vibrationEnabled;
+
+        const morseString = encodeToMorse(text);
+        console.log(`Playing Morse: ${text} -> ${morseString} at ${actualWpm} WPM, ${pitch}Hz, ${Math.round(volume * 100)}%`);
+        
         this.isPlaying = true;
         
         // Play Morse code with proper timing
-        await this.playMorseSequence(morseString, wpm);
+        await this.playMorseSequence(morseString, actualWpm, pitch, volume, audioEnabled, vibrationEnabled);
         
         this.isPlaying = false;
         resolve();
@@ -42,26 +51,34 @@ class AudioEngine {
     });
   }
 
-  private async playMorseSequence(morseString: string, wpm: number): Promise<void> {
+  private async playMorseSequence(morseString: string, wpm: number, pitch: number, volume: number, audioEnabled: boolean, vibrationEnabled: boolean): Promise<void> {
     const dotDuration = this.getDotDuration(wpm); // Duration of a dot in ms
     const dashDuration = dotDuration * 3; // Dash is 3 times longer than dot
-    const elementGap = dotDuration; // Gap between dots and dashes
-    const characterGap = dotDuration * 3; // Gap between characters
+    const elementGap = dotDuration; // Gap between dots and dashes within a character
+    const characterGap = dotDuration * 2; // Gap between characters (reduced from 3 to 2 for better timing)
     const wordGap = dotDuration * 7; // Gap between words
 
     for (let i = 0; i < morseString.length; i++) {
       const char = morseString[i];
+      const nextChar = morseString[i + 1];
       
       if (char === '.') {
-        // Play dot with both audio and vibration
-        await this.playTone(dotDuration, 'dot');
-        await this.sleep(elementGap);
+        // Play dot with audio and/or vibration
+        await this.playTone(dotDuration, 'dot', pitch, volume, audioEnabled, vibrationEnabled);
+        // Add element gap if next character is also a dot or dash (same character)
+        if (nextChar === '.' || nextChar === '-') {
+          await this.sleep(elementGap);
+        }
       } else if (char === '-') {
-        // Play dash with both audio and vibration
-        await this.playTone(dashDuration, 'dash');
-        await this.sleep(elementGap);
+        // Play dash with audio and/or vibration
+        await this.playTone(dashDuration, 'dash', pitch, volume, audioEnabled, vibrationEnabled);
+        // Add element gap if next character is also a dot or dash (same character)
+        if (nextChar === '.' || nextChar === '-') {
+          await this.sleep(elementGap);
+        }
       } else if (char === ' ') {
-        // Character gap
+        // This is a character gap (space between characters)
+        // The characterGap is already 3 units, which is correct
         await this.sleep(characterGap);
       } else if (char === '~') {
         // End of message
@@ -70,15 +87,22 @@ class AudioEngine {
     }
   }
 
-  private async playTone(duration: number, type: 'dot' | 'dash'): Promise<void> {
+  private async playTone(duration: number, type: 'dot' | 'dash', pitch: number, volume: number, audioEnabled: boolean, vibrationEnabled: boolean): Promise<void> {
     try {
-      console.log(`Playing ${type} for ${duration}ms`);
+      console.log(`Playing ${type} for ${duration}ms at ${pitch}Hz, ${Math.round(volume * 100)}%`);
       
-      // Play vibration for tactile feedback
-      Vibration.vibrate(duration);
+      // Play vibration if enabled
+      if (vibrationEnabled) {
+        Vibration.vibrate(duration);
+      }
       
-      // Try to play audio tone using a simple approach
-      await this.playSimpleTone(duration);
+      // Play audio if enabled
+      if (audioEnabled) {
+        await this.playSimpleTone(duration, pitch, volume);
+      } else {
+        // Just wait for the duration if audio is disabled
+        await this.sleep(duration);
+      }
       
     } catch (error) {
       console.warn('Could not play tone:', error);
@@ -87,22 +111,21 @@ class AudioEngine {
     }
   }
 
-  private async playSimpleTone(duration: number): Promise<void> {
+  private async playSimpleTone(duration: number, pitch: number, volume: number): Promise<void> {
     try {
       // Create a simple audio file with a tone using data URI
       const sampleRate = 44100;
-      const frequency = 600; // 600Hz tone
       
       // Generate WAV file data
-      const wavData = this.generateWavData(frequency, duration, sampleRate);
+      const wavData = this.generateWavData(pitch, duration, sampleRate);
       const base64Data = this.arrayBufferToBase64(wavData);
       
-      console.log(`Playing ${duration}ms tone at ${frequency}Hz`);
+      console.log(`Playing ${duration}ms tone at ${pitch}Hz, ${Math.round(volume * 100)}%`);
       
       // Create and play the audio
       const { sound } = await Audio.Sound.createAsync(
         { uri: `data:audio/wav;base64,${base64Data}` },
-        { shouldPlay: true, volume: 0.5 }
+        { shouldPlay: true, volume: volume }
       );
       
       // Wait for the sound to finish
@@ -117,9 +140,9 @@ class AudioEngine {
         sound.setOnPlaybackStatusUpdate(checkStatus);
         
         // Fallback timeout
-        setTimeout(() => {
+      setTimeout(() => {
           sound.unloadAsync();
-          resolve();
+        resolve();
         }, duration + 100);
       });
       

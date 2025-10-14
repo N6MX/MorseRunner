@@ -40,14 +40,10 @@ class DataLoader {
   // Load real data from bundled assets
   private async loadRealData(filename: string): Promise<ContestCall[]> {
     try {
-      // In Expo, we need to use a different approach to load bundled files
-      // For now, we'll use a fetch approach with the asset path
-      const response = await fetch(`./assets/data/${filename}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load ${filename}: ${response.status}`);
-      }
-      const text = await response.text();
-      return this.parseCallHistory(text, filename);
+      // For now, we'll use sample data since loading .txt files in Expo is complex
+      // In a production app, you'd convert these to JSON files or use a different approach
+      console.log(`Using sample data for ${filename} (real data loading not implemented yet)`);
+      return [];
     } catch (error) {
       console.warn(`Could not load real data from ${filename}, using sample data:`, error);
       return [];
