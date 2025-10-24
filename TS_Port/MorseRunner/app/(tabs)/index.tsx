@@ -9,33 +9,31 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 import { CalculateCRC32 } from '../../../typescript_src/Crc32';
+import { useApp } from '@/app/state/store';
 
 export default function HomeScreen() {
   const [isOn, setIsOn] = React.useState(false);
   const [crcInfo, setCrcInfo] = React.useState<string>('');
 
-  // Skeleton state (non-functional placeholders)
-  const [call, setCall] = React.useState('VE3NEA');
-  const [rst, setRst] = React.useState('599');
-  const [nr, setNr] = React.useState('001');
-
-  const [qrn, setQrn] = React.useState(false);
-  const [qrm, setQrm] = React.useState(false);
-  const [qsb, setQsb] = React.useState(false);
-  const [flutter, setFlutter] = React.useState(false);
-  const [lids, setLids] = React.useState(false);
-  const [activity, setActivity] = React.useState('3');
-
-  const [stationCall, setStationCall] = React.useState('VE3NEA');
-  const [wpm, setWpm] = React.useState('25');
-  const [qsk, setQsk] = React.useState(false);
-  const [cwPitch, setCwPitch] = React.useState('500 Hz');
-  const [rxBw, setRxBw] = React.useState('300 Hz');
-  const [monLevel, setMonLevel] = React.useState(0.75); // 0..1 placeholder
-
-  const [durationMin, setDurationMin] = React.useState('30');
-  const [contest, setContest] = React.useState('Pile-Up');
-  const [exchange, setExchange] = React.useState('3A ON');
+  // Store-backed state
+  const running = useApp(s => s.running);
+  const run = useApp(s => s.run);
+  const stop = useApp(s => s.stop);
+  const setField = useApp(s => s.setField);
+  const call = useApp(s => s.call);
+  const rst = useApp(s => s.rst);
+  const nr = useApp(s => s.nr);
+  const conditions = useApp(s => s.conditions);
+  const toggleCondition = useApp(s => s.toggleCondition);
+  const stationCall = useApp(s => s.stationCall);
+  const wpm = String(useApp(s => s.wpm));
+  const qsk = useApp(s => s.qsk);
+  const pitchHz = useApp(s => s.pitchHz);
+  const rxBandwidthHz = useApp(s => s.rxBandwidthHz);
+  const monLevel = useApp(s => s.monLevel01);
+  const contest = useApp(s => s.contest);
+  const exchange = useApp(s => s.exchange);
+  const durationMin = useApp(s => s.durationMin);
 
   const logHeaders = ['UTC', 'Call', 'Recv', 'Sent', 'Pref', 'Chk', 'Wpm'];
   const logRows = new Array(3).fill(0).map((_, i) => ({
@@ -132,9 +130,9 @@ export default function HomeScreen() {
                 <ScrollView horizontal>
                   <View>
                     <View style={styles.logHeader}>
-                      {logHeaders.map((h) => (
-                        <Text key={h} style={[styles.logCell, styles.logHeaderCell]}>{h}</Text>
-                      ))}
+                    {logHeaders.map((h) => (
+                      <Text key={h} style={[styles.logCell, { fontWeight: '600' }]}>{h}</Text>
+                    ))}
                     </View>
                     {logRows.map((r) => (
                       <View key={r.key} style={styles.logRow}>
@@ -162,32 +160,32 @@ export default function HomeScreen() {
               <View style={[styles.panel]}>
                 <Text style={styles.groupTitle}>Station</Text>
                 <View style={styles.row}>
-                  <View style={{ flex: 1, gap: 6 }}>
-                    <Text>Call</Text>
-                    <TextInput style={styles.input} value={stationCall} onChangeText={setStationCall} />
+                <View style={{ flex: 1, gap: 6 }}>
+                  <Text>Call</Text>
+                  <TextInput style={styles.input} value={stationCall} onChangeText={(v)=>useApp.getState().setSetting('stationCall', v)} />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text>WPM</Text>
-                    <TextInput style={styles.input} value={wpm} onChangeText={setWpm} />
+                  <TextInput style={styles.input} value={wpm} onChangeText={(v)=>useApp.getState().setSetting('wpm', Number(v)||0)} />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text>QSK</Text>
-                    <View style={styles.row}><Switch value={qsk} onValueChange={setQsk} /></View>
+                  <View style={styles.row}><Switch value={qsk} onValueChange={(v)=>useApp.getState().setSetting('qsk', v)} /></View>
                   </View>
                 </View>
                 <View style={styles.row}>
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text>CW Pitch</Text>
-                    <TextInput style={styles.input} value={cwPitch} onChangeText={setCwPitch} />
+                  <TextInput style={styles.input} value={`${pitchHz}`} onChangeText={(v)=>useApp.getState().setSetting('pitchHz', Number(v)||0)} />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text>RX Bandwidth</Text>
-                    <TextInput style={styles.input} value={rxBw} onChangeText={setRxBw} />
+                  <TextInput style={styles.input} value={`${rxBandwidthHz}`} onChangeText={(v)=>useApp.getState().setSetting('rxBandwidthHz', Number(v)||0)} />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text>Mon. Level</Text>
                     <View style={styles.sliderTrack}>
-                      <View style={[styles.sliderFill, { width: `${monLevel * 100}%` }]} />
+                    <View style={[styles.sliderFill, { width: `${monLevel * 100}%` }]} />
                     </View>
                   </View>
                 </View>
@@ -197,16 +195,16 @@ export default function HomeScreen() {
                 <Text style={styles.groupTitle}>Band Conditions</Text>
                 <View style={styles.row}>
                   <View style={{ flex: 1 }}>
-                    <View style={styles.rowBetween}><Text>QRN</Text><Switch value={qrn} onValueChange={setQrn} /></View>
-                    <View style={styles.rowBetween}><Text>QRM</Text><Switch value={qrm} onValueChange={setQrm} /></View>
-                    <View style={styles.rowBetween}><Text>QSB</Text><Switch value={qsb} onValueChange={setQsb} /></View>
+                    <View style={styles.rowBetween}><Text>QRN</Text><Switch value={conditions.qrn} onValueChange={()=>toggleCondition('qrn')} /></View>
+                    <View style={styles.rowBetween}><Text>QRM</Text><Switch value={conditions.qrm} onValueChange={()=>toggleCondition('qrm')} /></View>
+                    <View style={styles.rowBetween}><Text>QSB</Text><Switch value={conditions.qsb} onValueChange={()=>toggleCondition('qsb')} /></View>
                   </View>
                   <View style={{ flex: 1 }}>
-                    <View style={styles.rowBetween}><Text>Flutter</Text><Switch value={flutter} onValueChange={setFlutter} /></View>
-                    <View style={styles.rowBetween}><Text>LIDs</Text><Switch value={lids} onValueChange={setLids} /></View>
+                    <View style={styles.rowBetween}><Text>Flutter</Text><Switch value={conditions.flutter} onValueChange={()=>toggleCondition('flutter')} /></View>
+                    <View style={styles.rowBetween}><Text>LIDs</Text><Switch value={conditions.lids} onValueChange={()=>toggleCondition('lids')} /></View>
                     <View style={styles.rowBetween}>
                       <Text>Activity</Text>
-                      <TextInput style={[styles.input, { width: 50 }]} value={activity} onChangeText={setActivity} />
+                      <TextInput style={[styles.input, { width: 50 }]} value={`${conditions.activity}`} onChangeText={(v)=>useApp.getState().setSetting('conditions', { ...useApp.getState().conditions, activity: Math.max(1, Math.min(9, Number(v)||0)) })} />
                     </View>
                   </View>
                 </View>
@@ -217,11 +215,11 @@ export default function HomeScreen() {
                 <View style={styles.row}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text>for</Text>
-                    <TextInput style={[styles.input, { width: 60 }]} value={durationMin} onChangeText={setDurationMin} />
+                    <TextInput style={[styles.input, { width: 60 }]} value={`${durationMin}`} onChangeText={(v)=>useApp.getState().setSetting('durationMin', Number(v)||0)} />
                     <Text>min.</Text>
                   </View>
                   <View style={{ marginLeft: 16 }}>
-                    <Button title="Run ▾" onPress={() => {}} />
+                    <Button title={running ? 'Stop' : 'Run ▾'} onPress={() => { running ? stop() : run(); }} />
                   </View>
                 </View>
               </View>
@@ -236,15 +234,15 @@ export default function HomeScreen() {
               <View style={styles.row}>
                 <View style={{ flex: 2, gap: 6 }}>
                   <Text>Call</Text>
-                  <TextInput style={styles.input} value={call} onChangeText={setCall} />
+                  <TextInput style={styles.input} value={call} onChangeText={(v)=>setField('call', v)} />
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Text>RST</Text>
-                  <TextInput style={styles.input} value={rst} onChangeText={setRst} />
+                  <TextInput style={styles.input} value={rst} onChangeText={(v)=>setField('rst', v)} />
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Text>Nr.</Text>
-                  <TextInput style={styles.input} value={nr} onChangeText={setNr} />
+                  <TextInput style={styles.input} value={nr} onChangeText={(v)=>setField('nr', v)} />
                 </View>
               </View>
               <View style={[styles.row, { flexWrap: 'wrap', gap: 8, marginTop: 8 }]}>
@@ -310,11 +308,11 @@ export default function HomeScreen() {
             <View style={styles.row}>
               <View style={{ flex: 1, gap: 6 }}>
                 <Text>Contest</Text>
-                <TextInput style={styles.input} value={contest} onChangeText={setContest} />
+                <TextInput style={styles.input} value={contest} onChangeText={(v)=>useApp.getState().setSetting('contest', v)} />
               </View>
               <View style={{ flex: 1, gap: 6 }}>
                 <Text>Exchange</Text>
-                <TextInput style={styles.input} value={exchange} onChangeText={setExchange} />
+                <TextInput style={styles.input} value={exchange} onChangeText={(v)=>useApp.getState().setSetting('exchange', v)} />
               </View>
             </View>
           </View>
