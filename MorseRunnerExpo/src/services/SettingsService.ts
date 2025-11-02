@@ -11,6 +11,9 @@ export interface UserSettings {
   volume: number;
   vibrationEnabled: boolean;
   audioEnabled: boolean;
+  whiteNoiseEnabled: boolean;
+  whiteNoiseVolume: number;
+  rxBandwidth: number; // 100Hz to 600Hz in 50Hz increments
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -23,6 +26,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   volume: 0.5,
   vibrationEnabled: true,
   audioEnabled: true,
+  whiteNoiseEnabled: true,
+  whiteNoiseVolume: 0.3,
+  rxBandwidth: 300, // Default to 300Hz bandwidth
 };
 
 const SETTINGS_KEY = 'morserunner_settings';

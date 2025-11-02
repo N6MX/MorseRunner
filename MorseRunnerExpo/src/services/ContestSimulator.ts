@@ -2,12 +2,17 @@ import { ContestCall } from '../data/Contest';
 import { Station, StationState, StationMessage } from '../data/Station';
 import AudioEngine from './AudioEngine';
 import DataLoader from './DataLoader';
+import SettingsService from './SettingsService';
 
 export interface SimulatedStation {
   id: string;
   call: string;
   exchange1: string;
   exchange2: string;
+  wpm: number;
+  pitch: number;
+  volume: number;
+  amplitude: number;
   state: StationState;
   lastAction: number; // timestamp
   nextAction: number; // timestamp
@@ -15,6 +20,7 @@ export interface SimulatedStation {
   isMultiplier: boolean;
   isNewMultiplier: boolean;
   strength: number; // signal strength 1-9
+  isCallingCQ: boolean;
 }
 
 export interface ContestStats {
@@ -78,6 +84,10 @@ class ContestSimulator {
       endTime: this.stats.endTime
     };
 
+    // Start white noise for SSB simulation
+    console.log('Starting white noise for contest simulation');
+    await AudioEngine.startWhiteNoise();
+
     // Start the simulation timer
     this.startSimulationTimer();
 
@@ -85,12 +95,19 @@ class ContestSimulator {
   }
 
   // Stop the contest simulation
-  stopContest(): void {
+  async stopContest(): Promise<void> {
+    console.log('stopContest called');
     this.isRunning = false;
     if (this.simulationTimer) {
       clearInterval(this.simulationTimer);
       this.simulationTimer = null;
+      console.log('Simulation timer cleared');
     }
+    
+    // Stop white noise
+    console.log('Stopping white noise');
+    await AudioEngine.forceStopAllAudio();
+    
     console.log('Contest simulation stopped');
   }
 
@@ -190,10 +207,8 @@ class ContestSimulator {
         text = station.call;
     }
 
-    console.log(`Station ${station.call} sending: ${text}`);
-    
-    // Play the message
-    AudioEngine.playMorseCode(text, 30).catch(error => {
+    // Play the message using station's WPM setting
+    AudioEngine.playMorseCode(text, station.wpm).catch(error => {
       console.error('Error playing station message:', error);
     });
   }
@@ -233,26 +248,31 @@ class ContestSimulator {
     if (Math.random() < probability) {
       const station = this.createNewStation();
       this.stations.push(station);
-      console.log(`New station appeared: ${station.call}`);
     }
   }
 
   // Create a new station
   private createNewStation(): SimulatedStation {
     const callData = this.callHistory[Math.floor(Math.random() * this.callHistory.length)];
+    const settings = SettingsService.getSettings();
     
     return {
       id: `station_${Date.now()}_${Math.random()}`,
       call: callData.call,
       exchange1: callData.exchange1,
       exchange2: callData.exchange2,
+      wpm: settings.wpm + Math.floor(Math.random() * 10) - 5, // +/- 5 WPM from user setting
+      pitch: settings.pitch + Math.floor(Math.random() * 100) - 50, // +/- 50 Hz from user setting
+      volume: settings.volume * (0.5 + Math.random() * 0.5), // 50-100% of user volume
+      amplitude: 1.0,
       state: StationState.LISTENING,
       lastAction: Date.now(),
       nextAction: Date.now() + 1000 + Math.random() * 5000,
       messageQueue: [],
       isMultiplier: Math.random() < 0.3, // 30% chance of being a multiplier
       isNewMultiplier: false,
-      strength: Math.floor(Math.random() * 9) + 1
+      strength: Math.floor(Math.random() * 9) + 1,
+      isCallingCQ: false
     };
   }
 
@@ -306,8 +326,6 @@ class ContestSimulator {
       newStation.messageQueue = [...responseSequence];
       newStation.state = StationState.SENDING;
       newStation.nextAction = Date.now() + 2000 + Math.random() * 3000; // Respond in 2-5 seconds
-      
-      console.log(`New station responding to CQ: ${newStation.call}`);
     }
 
     // Also have some existing stations respond
@@ -344,8 +362,6 @@ class ContestSimulator {
     if (station.isMultiplier) {
       this.stats.multipliers++;
     }
-
-    console.log(`QSO completed with ${station.call}: +${this.getQSOValue(station)} points`);
   }
 
   // Get QSO value based on station type

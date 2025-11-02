@@ -161,7 +161,9 @@ class ContestManager {
         return;
     }
     
-    await AudioEngine.playMorseCode(messageText, station.wpmS);
+    // Use current user settings instead of station's hardcoded WPM
+    console.log(`ContestManager sending message: "${messageText}" using current user settings`);
+    await AudioEngine.playMorseCode(messageText);
   }
 
   // Port from Contest.pas - PickStation function

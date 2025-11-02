@@ -21,6 +21,9 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
   const [wpm, setWpm] = useState(30);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const [whiteNoiseEnabled, setWhiteNoiseEnabled] = useState(true);
+  const [whiteNoiseVolume, setWhiteNoiseVolume] = useState(0.3);
+  const [rxBandwidth, setRxBandwidth] = useState(300);
   const [isTesting, setIsTesting] = useState(false);
 
   useEffect(() => {
@@ -36,6 +39,9 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
     setWpm(settings.wpm);
     setVibrationEnabled(settings.vibrationEnabled);
     setAudioEnabled(settings.audioEnabled);
+    setWhiteNoiseEnabled(settings.whiteNoiseEnabled);
+    setWhiteNoiseVolume(settings.whiteNoiseVolume);
+    setRxBandwidth(settings.rxBandwidth);
   };
 
   const handleVolumeChange = async (value: number) => {
@@ -49,8 +55,10 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
   };
 
   const handleWpmChange = async (value: number) => {
+    console.log('WPM slider changed to:', value);
     setWpm(value);
     await SettingsService.updateSetting('wpm', value);
+    console.log('WPM setting saved:', value);
   };
 
   const handleVibrationToggle = async () => {
@@ -63,6 +71,28 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
     const newValue = !audioEnabled;
     setAudioEnabled(newValue);
     await SettingsService.updateSetting('audioEnabled', newValue);
+  };
+
+  const handleWhiteNoiseToggle = async () => {
+    const newValue = !whiteNoiseEnabled;
+    setWhiteNoiseEnabled(newValue);
+    await SettingsService.updateSetting('whiteNoiseEnabled', newValue);
+  };
+
+  const handleWhiteNoiseVolumeChange = async (value: number) => {
+    setWhiteNoiseVolume(value);
+    await SettingsService.updateSetting('whiteNoiseVolume', value);
+  };
+
+  const handleRxBandwidthChange = async (value: number) => {
+    // Round to nearest 50Hz increment (100Hz to 600Hz)
+    const roundedValue = Math.round(value / 50) * 50;
+    const clampedValue = Math.max(100, Math.min(600, roundedValue));
+    setRxBandwidth(clampedValue);
+    await SettingsService.updateSetting('rxBandwidth', clampedValue);
+    
+    // Restart white noise with new bandwidth
+    await AudioEngine.restartWhiteNoise();
   };
 
   const applyPreset = async (preset: 'contest' | 'practice' | 'slow' | 'fast') => {
@@ -110,7 +140,8 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
     setIsTesting(true);
     try {
       // Play a short test pattern: dash-dot-dash (T-E-T)
-      await AudioEngine.playMorseCode('TET', wpm);
+      // Don't pass wpm parameter - let AudioEngine use current settings
+      await AudioEngine.playMorseCode('TET');
     } catch (error) {
       console.error('Test audio failed:', error);
     } finally {
@@ -179,7 +210,6 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
                 onValueChange={handleVolumeChange}
                 minimumTrackTintColor="#2196F3"
                 maximumTrackTintColor="#E0E0E0"
-                thumbStyle={styles.sliderThumb}
               />
               <Text style={styles.sliderLabel}>100%</Text>
             </View>
@@ -199,7 +229,6 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
                 onValueChange={handlePitchChange}
                 minimumTrackTintColor="#4CAF50"
                 maximumTrackTintColor="#E0E0E0"
-                thumbStyle={styles.sliderThumb}
               />
               <Text style={styles.sliderLabel}>800Hz</Text>
             </View>
@@ -219,7 +248,6 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
                 onValueChange={handleWpmChange}
                 minimumTrackTintColor="#FF9800"
                 maximumTrackTintColor="#E0E0E0"
-                thumbStyle={styles.sliderThumb}
               />
               <Text style={styles.sliderLabel}>60</Text>
             </View>
@@ -247,6 +275,64 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
                 </Text>
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* White Noise Controls */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>White Noise (SSB Simulation)</Text>
+            <View style={styles.toggleContainer}>
+              <TouchableOpacity
+                style={[styles.toggleButton, whiteNoiseEnabled && styles.toggleButtonActive]}
+                onPress={handleWhiteNoiseToggle}
+              >
+                <Text style={[styles.toggleButtonText, whiteNoiseEnabled && styles.toggleButtonTextActive]}>
+                  White Noise
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            {whiteNoiseEnabled && (
+              <View style={styles.sliderContainer}>
+                <Text style={styles.sliderLabel}>0%</Text>
+                <Slider
+                  style={styles.slider}
+                  minimumValue={0}
+                  maximumValue={1}
+                  value={whiteNoiseVolume}
+                  onValueChange={handleWhiteNoiseVolumeChange}
+                  minimumTrackTintColor="#FF5722"
+                  maximumTrackTintColor="#E0E0E0"
+                />
+                <Text style={styles.sliderLabel}>100%</Text>
+              </View>
+            )}
+            {whiteNoiseEnabled && (
+              <Text style={styles.sliderValue}>{Math.round(whiteNoiseVolume * 100)}%</Text>
+            )}
+          </View>
+
+          {/* Rx Bandwidth Control */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Rx Bandwidth (SSB Filter)</Text>
+            <View style={styles.sliderContainer}>
+              <Text style={styles.sliderLabel}>100Hz</Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={100}
+                maximumValue={600}
+                step={50}
+                value={rxBandwidth}
+                onValueChange={handleRxBandwidthChange}
+                minimumTrackTintColor="#FF9800"
+                maximumTrackTintColor="#E0E0E0"
+              />
+              <Text style={styles.sliderLabel}>600Hz</Text>
+            </View>
+            <Text style={styles.sliderValue}>{rxBandwidth}Hz</Text>
+            <Text style={styles.bandwidthDescription}>
+              {rxBandwidth <= 200 ? 'Narrow (CW)' : 
+               rxBandwidth <= 400 ? 'Medium (SSB)' : 'Wide (SSB)'}
+            </Text>
           </View>
 
           {/* Test Button */}
@@ -423,6 +509,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  bandwidthDescription: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 });
 
