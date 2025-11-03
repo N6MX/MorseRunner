@@ -2815,6 +2815,37 @@ export const useMainFormHandlers = () => {
   const [scoreMultVerified, setScoreMultVerified] = useState<string>('0');
   const [scoreTotalRaw, setScoreTotalRaw] = useState<string>('0');
   const [scoreTotalVerified, setScoreTotalVerified] = useState<string>('0');
+  
+  // Panel6 state
+  const [listView2Visible, setListView2Visible] = useState<boolean>(false);
+  const [richEdit1Visible, setRichEdit1Visible] = useState<boolean>(false);
+  const [sbarVisible, setSbarVisible] = useState<boolean>(false);
+  const [sbarCaption, setSbarCaption] = useState<string>('');
+  const [richEdit1Text, setRichEdit1Text] = useState<string>('');
+  const [listView2Data, setListView2Data] = useState<Array<{
+    utc: string;
+    call: string;
+    recv: string;
+    sent: string;
+    pref: string;
+    chk: string;
+    wpm: string;
+  }>>([]);
+  const [appVersion, setAppVersion] = useState<string>('1.xx');
+  
+  // Panel9 - ContestGroup state
+  const [simContestComboItems, setSimContestComboItems] = useState<string[]>([]);
+  
+  // ComboBox items
+  const comboBox1Items = ['300 Hz', '350 Hz', '400 Hz', '450 Hz', '500 Hz', '550 Hz', '600 Hz', '650 Hz', '700 Hz', '750 Hz', '800 Hz', '850 Hz', '900 Hz'];
+  const comboBox2Items = ['100 Hz', '150 Hz', '200 Hz', '250 Hz', '300 Hz', '350 Hz', '400 Hz', '450 Hz', '500 Hz', '550 Hz', '600 Hz'];
+  
+  // ToolButton1 state (Run/Stop)
+  const [runButtonDown, setRunButtonDown] = useState<boolean>(false);
+  const [runButtonCaption, setRunButtonCaption] = useState<string>('   Run   ');
+  const [runDropdownVisible, setRunDropdownVisible] = useState<boolean>(false);
+  const [currentRunMode, setCurrentRunMode] = useState<string>('Pile-Up'); // Current selected run mode
+  
   // TODO: Add RecvExchTypes state when types are defined
 
   // Form control state (Edit controls)
@@ -3011,12 +3042,33 @@ export const useMainFormHandlers = () => {
     // - Call SendMsg with appropriate TStationMessage
   }, []);
 
-  const RunBtnClick = useCallback((sender: any) => {
-    console.log('RunBtnClick called');
-    // TODO: Implement from Pascal RunBtnClick
-    // - If RunMode = rmStop: Run(DefaultRunMode)
-    // - Else: Tst.FStopPressed = true
+  const handleRunModeSelect = useCallback((mode: string) => {
+    console.log('handleRunModeSelect called with mode:', mode);
+    setCurrentRunMode(mode);
+    setRunDropdownVisible(false);
+    // TODO: Implement Run(mode) - actual run logic
+    setRunButtonDown(true);
+    setRunButtonCaption('Stop');
   }, []);
+  
+  const RunBtnClick = useCallback((sender: any, isDropdownArea?: boolean) => {
+    console.log('RunBtnClick called', isDropdownArea ? '(dropdown area)' : '');
+    // Toggle dropdown if stopped, or stop if running
+    if (!runButtonDown) {
+      if (isDropdownArea) {
+        // Toggle dropdown
+        setRunDropdownVisible(!runDropdownVisible);
+      } else {
+        // Run with current mode
+        handleRunModeSelect(currentRunMode);
+      }
+    } else {
+      // When running, clicking stops
+      setRunButtonDown(false);
+      setRunButtonCaption('   Run   ');
+      setRunDropdownVisible(false);
+    }
+  }, [runButtonDown, runDropdownVisible, currentRunMode, handleRunModeSelect]);
 
   // ============================================================================
   // EVENT HANDLERS - Checkbox Events
@@ -3186,16 +3238,25 @@ export const useMainFormHandlers = () => {
   }, []);
 
   const RunMNUClick = useCallback((sender: any) => {
-    console.log('RunMNUClick called');
-    // TODO: Implement from Pascal RunMNUClick
-    // - SetDefaultRunMode((Sender as TComponent).Tag)
-    // - Run(DefaultRunMode)
-  }, []);
+    console.log('RunMNUClick called with tag:', sender?.tag);
+    // Map tag to mode: 1=Pile-Up, 2=Single Calls, 3=WPX Competition, 4=HST Competition
+    const modeMap: { [key: number]: string } = {
+      1: 'Pile-Up',
+      2: 'Single Calls',
+      3: 'WPX Competition',
+      4: 'HST Competition',
+    };
+    const mode = modeMap[sender?.tag] || 'Pile-Up';
+    handleRunModeSelect(mode);
+  }, [handleRunModeSelect]);
 
   const StopMNUClick = useCallback((sender: any) => {
     console.log('StopMNUClick called');
-    // TODO: Implement from Pascal StopMNUClick
-    // - Tst.FStopPressed = true
+    // Stop the run
+    setRunButtonDown(false);
+    setRunButtonCaption('   Run   ');
+    setRunDropdownVisible(false);
+    // TODO: Implement Run(rmStop) - actual stop logic
   }, []);
 
   const ViewScoreBoardMNUClick = useCallback((sender: any) => {
@@ -3422,6 +3483,25 @@ export const useMainFormHandlers = () => {
     scoreMultVerified, setScoreMultVerified,
     scoreTotalRaw, setScoreTotalRaw,
     scoreTotalVerified, setScoreTotalVerified,
+    
+    // Panel6 state
+    listView2Visible, setListView2Visible,
+    richEdit1Visible, setRichEdit1Visible,
+    sbarVisible, setSbarVisible,
+    sbarCaption, setSbarCaption,
+    richEdit1Text, setRichEdit1Text,
+    listView2Data, setListView2Data,
+    appVersion, setAppVersion,
+    
+    // Panel9 state
+    simContestComboItems, setSimContestComboItems,
+    comboBox1Items,
+    comboBox2Items,
+    runButtonDown, setRunButtonDown,
+    runButtonCaption, setRunButtonCaption,
+    runDropdownVisible, setRunDropdownVisible,
+    currentRunMode, setCurrentRunMode,
+    handleRunModeSelect,
     
     // Form event handlers
     FormCreate,

@@ -311,349 +311,7 @@
 //      Visible = False
 //    end
 //  end
-//  object Panel9: TPanel
-//    Left = 517
-//    Top = 2
-//    Width = 212
-//    Height = 359
-//    Align = alRight
-//    BevelOuter = bvNone
-//    TabOrder = 3
-//    object GroupBox3: TGroupBox
-//      Left = 6
-//      Top = 238
-//      Width = 194
-//      Height = 84
-//      Caption = ' Band Conditions '
-//      TabOrder = 0
-//      object Label11: TLabel
-//        Left = 144
-//        Top = 19
-//        Width = 40
-//        Height = 15
-//        Caption = 'Activity'
-//      end
-//      object CheckBox2: TCheckBox
-//        Left = 12
-//        Top = 61
-//        Width = 45
-//        Height = 17
-//        TabStop = False
-//        Caption = 'QSB'
-//        TabOrder = 0
-//        OnClick = CheckBoxClick
-//      end
-//      object CheckBox3: TCheckBox
-//        Left = 12
-//        Top = 41
-//        Width = 45
-//        Height = 17
-//        TabStop = False
-//        Caption = 'QRM'
-//        TabOrder = 1
-//        OnClick = CheckBoxClick
-//      end
-//      object CheckBox4: TCheckBox
-//        Left = 12
-//        Top = 21
-//        Width = 45
-//        Height = 17
-//        TabStop = False
-//        Caption = 'QRN'
-//        TabOrder = 2
-//        OnClick = CheckBoxClick
-//      end
-//      object CheckBox5: TCheckBox
-//        Left = 76
-//        Top = 21
-//        Width = 53
-//        Height = 17
-//        TabStop = False
-//        Caption = 'Flutter'
-//        TabOrder = 3
-//        OnClick = CheckBoxClick
-//      end
-//      object CheckBox6: TCheckBox
-//        Left = 76
-//        Top = 41
-//        Width = 45
-//        Height = 17
-//        TabStop = False
-//        Caption = 'LIDs'
-//        TabOrder = 4
-//        OnClick = CheckBoxClick
-//      end
-//      object SpinEdit3: TSpinEdit
-//        Left = 144
-//        Top = 35
-//        Width = 37
-//        Height = 24
-//        TabStop = False
-//        MaxLength = 1
-//        MaxValue = 9
-//        MinValue = 1
-//        TabOrder = 5
-//        Value = 3
-//        OnChange = SpinEdit3Change
-//      end
-//    end
-//    object GroupBox1: TGroupBox
-//      Left = 6
-//      Top = 81
-//      Width = 194
-//      Height = 155
-//      Caption = ' Station '
-//      TabOrder = 1
-//      object Label4: TLabel
-//        Left = 12
-//        Top = 21
-//        Width = 20
-//        Height = 15
-//        Caption = 'Call'
-//      end
-//      object Label5: TLabel
-//        Left = 162
-//        Top = 46
-//        Width = 29
-//        Height = 15
-//        Caption = 'WPM'
-//      end
-//      object Label6: TLabel
-//        Left = 12
-//        Top = 46
-//        Width = 54
-//        Height = 15
-//        Caption = 'CW Speed'
-//      end
-//      object Label7: TLabel
-//        Left = 13
-//        Top = 76
-//        Width = 49
-//        Height = 15
-//        Caption = 'CW Pitch'
-//      end
-//      object Label9: TLabel
-//        Left = 12
-//        Top = 106
-//        Width = 74
-//        Height = 15
-//        Caption = 'RX Bandwidth'
-//      end
-//      object VolumeSlider1: TVolumeSlider
-//        Left = 92
-//        Top = 129
-//        Width = 60
-//        Height = 20
-//        Hint = '-15.0 dB'
-//        ShowHint = True
-//        HintStep = 0
-//        Margin = 5
-//        Value = 0.750000000000000000
-//        Overloaded = False
-//        OnChange = VolumeSlider1Change
-//        OnDblClick = VolumeSliderDblClick
-//        DbScale = 60.000000000000000000
-//        Db = -15.000000000000000000
-//      end
-//      object Label18: TLabel
-//        Left = 12
-//        Top = 134
-//        Width = 58
-//        Height = 15
-//        Caption = 'Mon. Level'
-//      end
-//      object Edit4: TEdit
-//        Left = 45
-//        Top = 15
-//        Width = 89
-//        Height = 23
-//        CharCase = ecUpperCase
-//        Font.Charset = ANSI_CHARSET
-//        Font.Color = clWindowText
-//        Font.Height = -13
-//        Font.Name = 'Consolas'
-//        Font.Style = []
-//        ParentFont = False
-//        TabOrder = 0
-//        Text = 'VE3NEA'
-//        OnChange = Edit4Change
-//        OnExit = Edit4Exit
-//      end
-//      object SpinEdit1: TSpinEdit
-//        Left = 91
-//        Top = 43
-//        Width = 65
-//        Height = 24
-//        TabStop = False
-//        MaxLength = 3
-//        MaxValue = 120
-//        MinValue = 10
-//        TabOrder = 2
-//        Value = 25
-//        OnChange = SpinEdit1Change
-//        OnExit = SpinEdit1Exit
-//      end
-//      object CheckBox1: TCheckBox
-//        Left = 140
-//        Top = 17
-//        Width = 45
-//        Height = 17
-//        TabStop = False
-//        Caption = 'QSK'
-//        TabOrder = 1
-//        OnClick = CheckBox1Click
-//      end
-//      object ComboBox1: TComboBox
-//        Left = 92
-//        Top = 73
-//        Width = 65
-//        Height = 23
-//        Style = csDropDownList
-//        DropDownCount = 12
-//        TabOrder = 3
-//        TabStop = False
-//        OnChange = ComboBox1Change
-//        Items.Strings = (
-//          '300 Hz'
-//          '350 Hz'
-//          '400 Hz'
-//          '450 Hz'
-//          '500 Hz'
-//          '550 Hz'
-//          '600 Hz'
-//          '650 Hz'
-//          '700 Hz'
-//          '750 Hz'
-//          '800 Hz'
-//          '850 Hz'
-//          '900 Hz')
-//      end
-//      object ComboBox2: TComboBox
-//        Left = 92
-//        Top = 102
-//        Width = 65
-//        Height = 23
-//        Style = csDropDownList
-//        DropDownCount = 12
-//        TabOrder = 4
-//        TabStop = False
-//        OnChange = ComboBox2Change
-//        Items.Strings = (
-//          '100 Hz'
-//          '150 Hz'
-//          '200 Hz'
-//          '250 Hz'
-//          '300 Hz'
-//          '350 Hz'
-//          '400 Hz'
-//          '450 Hz'
-//          '500 Hz'
-//          '550 Hz'
-//          '600 Hz')
-//      end
-//    end
-//    object Panel10: TPanel
-//      Left = 0
-//      Top = 322
-//      Width = 212
-//      Height = 37
-//      Align = alBottom
-//      BevelOuter = bvNone
-//      TabOrder = 2
-//      object Label8: TLabel
-//        Left = 179
-//        Top = 13
-//        Width = 24
-//        Height = 15
-//        Caption = 'min.'
-//      end
-//      object Label10: TLabel
-//        Left = 107
-//        Top = 13
-//        Width = 15
-//        Height = 15
-//        Caption = 'for'
-//      end
-//      object SpinEdit2: TSpinEdit
-//        Left = 128
-//        Top = 10
-//        Width = 45
-//        Height = 24
-//        TabStop = False
-//        MaxLength = 2
-//        MaxValue = 240
-//        MinValue = 1
-//        TabOrder = 0
-//        Value = 30
-//        OnChange = SpinEdit2Change
-//      end
-//      object ToolBar1: TToolBar
-//        Left = 6
-//        Top = 6
-//        Width = 97
-//        Height = 29
-//        Align = alNone
-//        ButtonHeight = 30
-//        ButtonWidth = 72
-//        Caption = 'ToolBar1'
-//        Flat = False
-//        Images = ImageList1
-//        Indent = 3
-//        List = True
-//        ShowCaptions = True
-//        TabOrder = 1
-//        object ToolButton1: TToolButton
-//          Tag = 1
-//          Left = 3
-//          Top = 0
-//          AllowAllUp = True
-//          AutoSize = True
-//          Caption = '   Run   '
-//          DropdownMenu = PopupMenu1
-//          Grouped = True
-//          ImageIndex = 0
-//          Style = tbsDropDown
-//          OnClick = RunBtnClick
-//        end
-//      end
-//    end
-//    object ContestGroup: TGroupBox
-//      Left = 6
-//      Top = 6
-//      Width = 195
-//      Height = 74
-//      Caption = 'Contest'
-//      TabOrder = 3
-//      object Label17: TLabel
-//        Left = 12
-//        Top = 47
-//        Width = 50
-//        Height = 15
-//        Caption = 'Exchange'
-//      end
-//      object SimContestCombo: TComboBox
-//        Left = 23
-//        Top = 18
-//        Width = 169
-//        Height = 23
-//        Style = csDropDownList
-//        TabOrder = 0
-//        TabStop = False
-//        OnChange = SimContestComboChange
-//      end
-//      object ExchangeEdit: TEdit
-//        Left = 76
-//        Top = 44
-//        Width = 116
-//        Height = 23
-//        CharCase = ecUpperCase
-//        TabOrder = 1
-//        Text = '3A ON'
-//        OnChange = ExchangeEditChange
-//        OnExit = ExchangeEditExit
-//      end
-//    end
-//  end
+
 //  object AlSoundOut1: TAlSoundOut
 //    SamplesPerSec = 11025
 //    BufCount = 8
@@ -1691,7 +1349,7 @@
 // TYPESCRIPT/REACT NATIVE IMPLEMENTATION BELOW
 // ============================================================================
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -1701,6 +1359,8 @@ import {
   StyleSheet,
   Switch,
   Dimensions,
+  Modal,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useMainFormHandlers } from './MainFormHandlers';
@@ -1716,6 +1376,8 @@ const { width, height } = Dimensions.get('window');
  */
 const MainForm: React.FC = () => {
   const handlers = useMainFormHandlers();
+  const [dropdownButtonLayout, setDropdownButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const buttonContainerRef = useRef<View>(null);
 
   // Initialize form on mount
   useEffect(() => {
@@ -1725,6 +1387,15 @@ const MainForm: React.FC = () => {
     };
   }, []);
 
+  // Update button position when dropdown becomes visible
+  useEffect(() => {
+    if (handlers.runDropdownVisible && buttonContainerRef.current) {
+      buttonContainerRef.current.measure((x, y, width, height, pageX, pageY) => {
+        setDropdownButtonLayout({ x: pageX, y: pageY, width, height });
+      });
+    }
+  }, [handlers.runDropdownVisible]);
+
   return (
     <View style={styles.container}>
       {/* Bevel1 - Top separator line */}
@@ -1732,26 +1403,503 @@ const MainForm: React.FC = () => {
 
       {/* Main content area - Left panel and Right sidebar */}
       <View style={styles.mainContent}>
-        {/* Left Panel - Central Information Panel (~70%) */}
-        <ScrollView style={styles.leftPanel} contentContainerStyle={styles.leftPanelContent}>
+        {/* Panel6 - Main content panel (ListView2, RichEdit1, splash screen) */}
+        <View style={styles.panel6}>
+          {/* ListView2 - Contest log table (initially hidden) */}
+          {handlers.listView2Visible && (
+            <View style={styles.listView2}>
+              {/* Header */}
+              <View style={styles.listView2Header}>
+                <View style={styles.listView2ColUTC}>
+                  <Text style={styles.listView2HeaderText}>UTC</Text>
+                </View>
+                <View style={styles.listView2ColCall}>
+                  <Text style={styles.listView2HeaderText}>Call</Text>
+                </View>
+                <View style={styles.listView2ColRecv}>
+                  <Text style={styles.listView2HeaderText}>Recv</Text>
+                </View>
+                <View style={styles.listView2ColSent}>
+                  <Text style={styles.listView2HeaderText}>Sent</Text>
+                </View>
+                <View style={styles.listView2ColPref}>
+                  <Text style={styles.listView2HeaderText}>Pref</Text>
+                </View>
+                <View style={styles.listView2ColChk}>
+                  <Text style={styles.listView2HeaderText}>Chk</Text>
+                </View>
+                <View style={styles.listView2ColWpm}>
+                  <Text style={styles.listView2HeaderText}>Wpm</Text>
+                </View>
+              </View>
+              {/* Data rows */}
+              <ScrollView style={styles.listView2Data}>
+                {handlers.listView2Data.map((item, index) => (
+                  <View key={index} style={styles.listView2Row}>
+                    <View style={styles.listView2ColUTC}>
+                      <Text style={styles.listView2CellText}>{item.utc}</Text>
+                    </View>
+                    <View style={styles.listView2ColCall}>
+                      <Text style={styles.listView2CellText}>{item.call}</Text>
+                    </View>
+                    <View style={styles.listView2ColRecv}>
+                      <Text style={styles.listView2CellText}>{item.recv}</Text>
+                    </View>
+                    <View style={styles.listView2ColSent}>
+                      <Text style={styles.listView2CellText}>{item.sent}</Text>
+                    </View>
+                    <View style={styles.listView2ColPref}>
+                      <Text style={styles.listView2CellText}>{item.pref}</Text>
+                    </View>
+                    <View style={styles.listView2ColChk}>
+                      <Text style={styles.listView2CellText}>{item.chk}</Text>
+                    </View>
+                    <View style={styles.listView2ColWpm}>
+                      <Text style={styles.listView2CellText}>{item.wpm}</Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
 
-          {/* TODO: Add remaining panels and components:
-              - Panel5: Main content area (ListView2, RichEdit1, sbar)
-              - Panel6: Additional content
-              - Panel9-Panel10: More panels
-              - GroupBox1, GroupBox3, ContestGroup
-              - All remaining controls
-          */}
-          <View style={styles.placeholderArea}>
-            <Text style={styles.placeholderText}>Additional panels and controls will be implemented here</Text>
+          {/* Shape1 - Background shape */}
+          <View style={styles.shape1} />
+
+          {/* Splash screen labels (visible when ListView2 is hidden) */}
+          {!handlers.listView2Visible && !handlers.richEdit1Visible && (
+            <View style={styles.splashContainer}>
+              {/* Label12 - Aqua shadow */}
+              <Text style={styles.label12}>Morse Runner {handlers.appVersion}</Text>
+              
+              {/* Label13 - Green shadow */}
+              <Text style={styles.label13}>Morse Runner {handlers.appVersion}</Text>
+              
+              {/* Label14 - Main title */}
+              <Text style={styles.label14}>Morse Runner {handlers.appVersion}</Text>
+              
+              {/* Label20 - Subtitle */}
+              <Text style={styles.label20}>CW CONTEST SIMULATOR</Text>
+              
+              {/* Label16 - Freeware label */}
+              <Text style={styles.label16}>FREEWARE</Text>
+              
+              {/* Label15 - Copyright */}
+              <Text style={styles.label15}>Copyright ©2004-2016 Alex Shovkoplyas, VE3NEA</Text>
+              
+              {/* Label21 - Website */}
+              <Text style={styles.label21}>http://www.dxatlas.com/MorseRunner</Text>
+              
+              {/* Label19 - Community Edition copyright */}
+              <Text style={styles.label19}>Copyright ©2022-2025 Morse Runner Community Edition Contributors</Text>
+              
+              {/* Label22 - GitHub link */}
+              <Text style={styles.label22}>https://www.github.com/w7sst/MorseRunner</Text>
+            </View>
+          )}
+
+          {/* RichEdit1 - Score table (initially hidden) */}
+          {handlers.richEdit1Visible && (
+            <ScrollView style={styles.richEdit1}>
+              <Text style={styles.richEdit1Text}>{handlers.richEdit1Text || 'Your score table is empty'}</Text>
+            </ScrollView>
+          )}
+
+          {/* sbar - Status bar (initially hidden) */}
+          {handlers.sbarVisible && (
+            <View style={styles.sbar}>
+              <Text style={styles.sbarText}>{handlers.sbarCaption}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Panel9 - Right sidebar controls panel */}
+        <View style={styles.panel9}>
+          {/* Scrollable content container */}
+          <View style={styles.panel9Content}>
+            {/* ContestGroup - Contest selection */}
+            <View style={styles.contestGroup}>
+            <Text style={styles.groupBoxTitle}>Contest</Text>
+            {/* SimContestCombo - Contest dropdown */}
+            <TouchableOpacity style={styles.comboBox}>
+              <Text style={styles.comboBoxText}>
+                {handlers.simContestComboItems[handlers.simContestComboIndex] || 'Select Contest...'}
+              </Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.label17}>Exchange</Text>
+            {/* ExchangeEdit */}
+            <TextInput
+              style={styles.exchangeEdit}
+              value={handlers.exchangeEditText}
+              onChangeText={handlers.setExchangeEditText}
+              onChange={handlers.ExchangeEditChange}
+              onBlur={handlers.ExchangeEditExit}
+              maxLength={20}
+              autoCapitalize="characters"
+              placeholder="Exchange"
+            />
           </View>
-        </ScrollView>
 
-        {/* Right Sidebar - Controls Panel (~30%) */}
-        <View style={styles.rightSidebar}>
-          {/* Placeholder for right sidebar controls */}
-          <View style={styles.placeholderArea}>
-            <Text style={styles.placeholderText}>Right sidebar controls</Text>
+          {/* GroupBox1 - Station settings */}
+          <View style={styles.groupBox1}>
+            <Text style={styles.groupBoxTitle}>Station</Text>
+            
+            {/* Call and QSK row */}
+            <View style={styles.stationRow}>
+              <Text style={styles.label4}>Call</Text>
+              <TextInput
+                style={styles.edit4}
+                value={handlers.edit4Text}
+                onChangeText={handlers.setEdit4Text}
+                onChange={handlers.Edit4Change}
+                onBlur={handlers.Edit4Exit}
+                maxLength={15}
+                autoCapitalize="characters"
+                placeholder="Call"
+              />
+              <Switch
+                style={styles.checkBox1Switch}
+                value={handlers.checkBox1Checked}
+                onValueChange={(value) => {
+                  handlers.setCheckBox1Checked(value);
+                  handlers.CheckBox1Click(null);
+                }}
+              />
+              <Text style={styles.checkBox1Label}>QSK</Text>
+            </View>
+
+            {/* CW Speed row */}
+            <View style={styles.stationRow}>
+              <Text style={styles.label6}>CW Speed</Text>
+              {/* SpinEdit1 */}
+              <View style={styles.spinEditContainer}>
+                <TouchableOpacity
+                  style={styles.spinEditButton}
+                  onPress={() => {
+                    if (handlers.spinEdit1Value > 10) {
+                      handlers.setSpinEdit1Value(handlers.spinEdit1Value - 1);
+                      handlers.SpinEdit1Change(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.spinEditButtonText}>-</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.spinEditInput}
+                  value={handlers.spinEdit1Value.toString()}
+                  onChangeText={(text) => {
+                    const val = parseInt(text) || 25;
+                    if (val >= 10 && val <= 120) {
+                      handlers.setSpinEdit1Value(val);
+                      handlers.SpinEdit1Change(null);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  maxLength={3}
+                  onBlur={handlers.SpinEdit1Exit}
+                />
+                <TouchableOpacity
+                  style={styles.spinEditButton}
+                  onPress={() => {
+                    if (handlers.spinEdit1Value < 120) {
+                      handlers.setSpinEdit1Value(handlers.spinEdit1Value + 1);
+                      handlers.SpinEdit1Change(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.spinEditButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.label5}>WPM</Text>
+            </View>
+
+            {/* CW Pitch row */}
+            <View style={styles.stationRow}>
+              <Text style={styles.label7}>CW Pitch</Text>
+              {/* ComboBox1 - Pitch selection */}
+              <TouchableOpacity style={styles.comboBox}>
+                <Text style={styles.comboBoxText}>
+                  {handlers.comboBox1Items[handlers.comboBox1Index]}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* RX Bandwidth row */}
+            <View style={styles.stationRow}>
+              <Text style={styles.label9}>RX Bandwidth</Text>
+              {/* ComboBox2 - Bandwidth selection */}
+              <TouchableOpacity style={styles.comboBox}>
+                <Text style={styles.comboBoxText}>
+                  {handlers.comboBox2Items[handlers.comboBox2Index]}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Mon. Level row */}
+            <View style={styles.stationRow}>
+              <Text style={styles.label18}>Mon. Level</Text>
+              {/* VolumeSlider1 */}
+              <Slider
+                style={styles.volumeSlider1}
+                minimumValue={0}
+                maximumValue={1}
+                value={handlers.volumeSlider1Value}
+                onValueChange={(value) => {
+                  handlers.setVolumeSlider1Value(value);
+                  handlers.VolumeSlider1Change(null);
+                }}
+                onSlidingComplete={handlers.VolumeSlider1Change}
+                minimumTrackTintColor="#1fb28a"
+                maximumTrackTintColor="#d3d3d3"
+              />
+            </View>
+          </View>
+
+          {/* GroupBox3 - Band Conditions */}
+          <View style={styles.groupBox3}>
+            <Text style={styles.groupBoxTitle}> Band Conditions </Text>
+            
+            <View style={styles.bandConditionsRow}>
+              <View style={styles.bandConditionsCol}>
+                <View style={styles.checkBoxRow}>
+                  <Switch
+                    value={handlers.checkBox4Checked}
+                    onValueChange={(value) => {
+                      handlers.setCheckBox4Checked(value);
+                      handlers.CheckBoxClick(null);
+                    }}
+                  />
+                  <Text style={styles.checkBoxLabel}>QRN</Text>
+                </View>
+                <View style={styles.checkBoxRow}>
+                  <Switch
+                    value={handlers.checkBox3Checked}
+                    onValueChange={(value) => {
+                      handlers.setCheckBox3Checked(value);
+                      handlers.CheckBoxClick(null);
+                    }}
+                  />
+                  <Text style={styles.checkBoxLabel}>QRM</Text>
+                </View>
+                <View style={styles.checkBoxRow}>
+                  <Switch
+                    value={handlers.checkBox2Checked}
+                    onValueChange={(value) => {
+                      handlers.setCheckBox2Checked(value);
+                      handlers.CheckBoxClick(null);
+                    }}
+                  />
+                  <Text style={styles.checkBoxLabel}>QSB</Text>
+                </View>
+              </View>
+              
+              <View style={styles.bandConditionsCol}>
+                <View style={styles.checkBoxRow}>
+                  <Switch
+                    value={handlers.checkBox5Checked}
+                    onValueChange={(value) => {
+                      handlers.setCheckBox5Checked(value);
+                      handlers.CheckBoxClick(null);
+                    }}
+                  />
+                  <Text style={styles.checkBoxLabel}>Flutter</Text>
+                </View>
+                <View style={styles.checkBoxRow}>
+                  <Switch
+                    value={handlers.checkBox6Checked}
+                    onValueChange={(value) => {
+                      handlers.setCheckBox6Checked(value);
+                      handlers.CheckBoxClick(null);
+                    }}
+                  />
+                  <Text style={styles.checkBoxLabel}>LIDs</Text>
+                </View>
+              </View>
+
+              {/* Activity column - third column */}
+              <View style={styles.activityColumn}>
+                <Text style={styles.label11}>Activity</Text>
+                {/* SpinEdit3 */}
+                <View style={styles.spinEditContainer}>
+                  <TouchableOpacity
+                    style={styles.spinEditButton}
+                    onPress={() => {
+                      if (handlers.spinEdit3Value > 1) {
+                        handlers.setSpinEdit3Value(handlers.spinEdit3Value - 1);
+                        handlers.SpinEdit3Change(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.spinEditButtonText}>-</Text>
+                  </TouchableOpacity>
+                  <TextInput
+                    style={styles.spinEditInput}
+                    value={handlers.spinEdit3Value.toString()}
+                    onChangeText={(text) => {
+                      const val = parseInt(text) || 3;
+                      if (val >= 1 && val <= 9) {
+                        handlers.setSpinEdit3Value(val);
+                        handlers.SpinEdit3Change(null);
+                      }
+                    }}
+                    keyboardType="numeric"
+                    maxLength={1}
+                  />
+                  <TouchableOpacity
+                    style={styles.spinEditButton}
+                    onPress={() => {
+                      if (handlers.spinEdit3Value < 9) {
+                        handlers.setSpinEdit3Value(handlers.spinEdit3Value + 1);
+                        handlers.SpinEdit3Change(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.spinEditButtonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+          </View>
+
+          {/* Panel10 - Bottom panel with Run button and Duration */}
+          <View style={styles.panel10}>
+            {/* ToolButton1 - Run/Stop button with dropdown */}
+            <View 
+              ref={buttonContainerRef}
+              style={styles.toolButton1Container}
+              onLayout={(event) => {
+                buttonContainerRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                  setDropdownButtonLayout({ x: pageX, y: pageY, width, height });
+                });
+              }}
+            >
+              <TouchableOpacity
+                style={[styles.toolButton1, handlers.runButtonDown && styles.toolButton1Down]}
+                onPress={() => handlers.RunBtnClick(null, false)}
+              >
+                <View style={styles.toolButton1Content}>
+                  {/* Green play icon */}
+                  <View style={styles.playIcon} />
+                  <Text style={styles.toolButton1Text}>{handlers.runButtonCaption}</Text>
+                </View>
+              </TouchableOpacity>
+              {/* Dropdown arrow button */}
+              <TouchableOpacity
+                style={styles.toolButton1Dropdown}
+                onPress={() => handlers.RunBtnClick(null, true)}
+              >
+                <Text style={styles.dropdownArrow}>▼</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {/* Dropdown menu - rendered in Modal to appear above all elements */}
+            <Modal
+              visible={handlers.runDropdownVisible && !handlers.runButtonDown}
+              transparent={true}
+              animationType="none"
+              onRequestClose={() => handlers.setRunDropdownVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => handlers.setRunDropdownVisible(false)}>
+                <View style={styles.modalOverlay}>
+                  {dropdownButtonLayout && (
+                    <View
+                      style={[
+                        styles.runDropdownMenu,
+                        {
+                          position: 'absolute',
+                          top: dropdownButtonLayout.y + dropdownButtonLayout.height,
+                          left: dropdownButtonLayout.x,
+                        },
+                      ]}
+                      onStartShouldSetResponder={() => true}
+                    >
+                      <TouchableOpacity
+                        style={[
+                          styles.runDropdownItem,
+                          handlers.currentRunMode === 'Pile-Up' && styles.runDropdownItemSelected,
+                        ]}
+                        onPress={() => handlers.handleRunModeSelect('Pile-Up')}
+                      >
+                        <Text style={[
+                          styles.runDropdownItemText,
+                          handlers.currentRunMode === 'Pile-Up' && styles.runDropdownItemTextSelected,
+                        ]}>Pile-Up</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.runDropdownItem}
+                        onPress={() => handlers.handleRunModeSelect('Single Calls')}
+                      >
+                        <Text style={styles.runDropdownItemText}>Single Calls</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.runDropdownItem}
+                        onPress={() => handlers.handleRunModeSelect('WPX Competition')}
+                      >
+                        <Text style={styles.runDropdownItemText}>WPX Competition</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.runDropdownItem}
+                        onPress={() => handlers.handleRunModeSelect('HST Competition')}
+                      >
+                        <Text style={styles.runDropdownItemText}>HST Competition</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.runDropdownItem, styles.runDropdownItemDisabled]}
+                        disabled={true}
+                      >
+                        <Text style={styles.runDropdownItemTextDisabled}>Stop</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Duration row */}
+            <View style={styles.durationRow}>
+              <Text style={styles.label10}>for</Text>
+              {/* SpinEdit2 - Duration */}
+              <View style={styles.spinEditContainer}>
+                <TouchableOpacity
+                  style={styles.spinEditButton}
+                  onPress={() => {
+                    if (handlers.spinEdit2Value > 1) {
+                      handlers.setSpinEdit2Value(handlers.spinEdit2Value - 1);
+                      handlers.SpinEdit2Change(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.spinEditButtonText}>-</Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={styles.spinEditInput}
+                  value={handlers.spinEdit2Value.toString()}
+                  onChangeText={(text) => {
+                    const val = parseInt(text) || 30;
+                    if (val >= 1 && val <= 240) {
+                      handlers.setSpinEdit2Value(val);
+                      handlers.SpinEdit2Change(null);
+                    }
+                  }}
+                  keyboardType="numeric"
+                  maxLength={3}
+                />
+                <TouchableOpacity
+                  style={styles.spinEditButton}
+                  onPress={() => {
+                    if (handlers.spinEdit2Value < 240) {
+                      handlers.setSpinEdit2Value(handlers.spinEdit2Value + 1);
+                      handlers.SpinEdit2Change(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.spinEditButtonText}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.label8}>min.</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -2012,6 +2160,250 @@ const styles = StyleSheet.create({
     padding: 8,
     paddingBottom: 8,
   },
+  panel6: {
+    flex: 0.7,
+    backgroundColor: '#F0F0F0',
+    borderWidth: 1,
+    borderColor: '#808080',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  splashContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  shape1: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#E0FFFF', // Light cyan/blue-green to match original
+    zIndex: 0, // Behind all other content
+  },
+  listView2: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 54,
+    backgroundColor: '#FFFFFF',
+    zIndex: 10,
+  },
+  listView2Header: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#808080',
+    backgroundColor: '#E0E0E0',
+    paddingVertical: 4,
+  },
+  listView2Data: {
+    maxHeight: 40,
+  },
+  listView2Row: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingVertical: 2,
+  },
+  listView2ColUTC: {
+    width: 80,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColCall: {
+    width: 104,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColRecv: {
+    width: 90,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColSent: {
+    width: 84,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColPref: {
+    flex: 1,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColChk: {
+    width: 40,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2ColWpm: {
+    width: 40,
+    paddingLeft: 4,
+    justifyContent: 'center',
+  },
+  listView2HeaderText: {
+    fontSize: 15,
+    fontFamily: 'Consolas',
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  listView2CellText: {
+    fontSize: 15,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
+  label12: {
+    position: 'absolute',
+    top: '16.1%', // Very slight offset below main text for shadow effect
+    left: 0,
+    right: 0,
+    width: '100%',
+    fontSize: 35,
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: '#87CEEB', // Light blue/cyan shadow (bottom-right offset)
+    backgroundColor: 'transparent',
+    zIndex: 1, // Behind main text
+    textAlign: 'center',
+    paddingLeft: '0.1%', // Very slight offset right for shadow effect
+  },
+  label13: {
+    position: 'absolute',
+    top: '16.0%', // Same vertical position as main text
+    left: 0,
+    right: 0,
+    width: '100%',
+    fontSize: 35,
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: '#228B22', // Forest green (main text)
+    backgroundColor: 'transparent',
+    zIndex: 2, // Above shadow but could be removed if not needed
+    opacity: 0, // Hidden - we only need Label12 and Label14
+    textAlign: 'center',
+  },
+  label14: {
+    position: 'absolute',
+    top: '16.0%', // Main text position
+    left: 0,
+    right: 0,
+    width: '100%',
+    fontSize: 35,
+    fontFamily: 'Arial',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: '#228B22', // Forest green (main text, on top)
+    backgroundColor: 'transparent',
+    zIndex: 3, // On top of shadow
+    textAlign: 'center',
+  },
+  label15: {
+    position: 'absolute',
+    top: '47%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+  },
+  label16: {
+    position: 'absolute',
+    top: '35%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+  },
+  label19: {
+    position: 'absolute',
+    top: '65%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  label20: {
+    position: 'absolute',
+    top: '29%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+  },
+  label21: {
+    position: 'absolute',
+    top: '53%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+  },
+  label22: {
+    position: 'absolute',
+    top: '71%',
+    width: '100%',
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#333333', // Dark gray
+    backgroundColor: 'transparent',
+    zIndex: 2,
+    textAlign: 'center',
+  },
+  richEdit1: {
+    position: 'absolute',
+    bottom: 22, // Space for sbar
+    left: 0,
+    right: 0,
+    height: 41,
+    backgroundColor: '#FFFFFF',
+    zIndex: 10,
+  },
+  richEdit1Text: {
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#000000',
+    padding: 4,
+  },
+  sbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 22,
+    backgroundColor: '#F0F0F0',
+    justifyContent: 'center',
+    paddingLeft: 4,
+    zIndex: 10,
+  },
+  sbarText: {
+    fontSize: 12,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
   rightSidebar: {
     flex: 0.3,
     backgroundColor: '#F0F0F0',
@@ -2020,7 +2412,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   panel2: {
-    width: 150,
+    width: 191,
     minHeight: 33,
     backgroundColor: '#000000',
     borderWidth: 1,
@@ -2032,12 +2424,11 @@ const styles = StyleSheet.create({
   panel2Text: {
     fontSize: 24,
     fontFamily: 'monospace',
-    color: '#00FF00', // Bright green
-    fontWeight: 'bold',
+    color: '#15ebed',
   },
   panel3: {
     width: '100%',
-    minHeight: 67,
+    flex: 1,
     borderWidth: 1,
     borderColor: '#808080',
     backgroundColor: '#FFFFE0',
@@ -2073,6 +2464,10 @@ const styles = StyleSheet.create({
   },
   panel1Left: {
     flex: 1,
+    borderRightWidth: 1,
+    borderRightColor: '#808080',
+    paddingHorizontal: 8,
+    flexDirection: 'column',
   },
   panel4Panel7Row: {
     flexDirection: 'row',
@@ -2080,7 +2475,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   panel4: {
-    width: 114,
+    flex: 1,
     minHeight: 33,
     backgroundColor: '#F0F0F0',
     borderWidth: 1,
@@ -2096,7 +2491,7 @@ const styles = StyleSheet.create({
     color: '#FF0000', // Red by default (clRed), will change to green for non-competition mode
   },
   panel7: {
-    width: 104,
+    flex: 1,
     minHeight: 33,
     backgroundColor: '#F0F0F0',
     borderWidth: 1,
@@ -2115,9 +2510,11 @@ const styles = StyleSheet.create({
   },
   shape2: {
     position: 'absolute',
-    width: 32,
-    height: 7,
-    backgroundColor: '#C4D3E8', // Color 12902431 in hex (clInfoBk-ish)
+    marginTop: -2,
+    width: 80,
+    height: 10,
+    backgroundColor: '#15ebed',
+    borderWidth: 1,
     top: 1,
   },
   panel1Right: {
@@ -2244,15 +2641,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonContainer: {
+    flex: 1,
     gap: 4,
   },
   buttonRow: {
     flexDirection: 'row',
+    flex: 1,
     gap: 4,
   },
   speedButton: {
     flex: 1,
-    height: 26,
+    flexGrow: 1,
     backgroundColor: '#E0E0E0',
     borderWidth: 1,
     borderColor: '#808080',
@@ -2264,6 +2663,341 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#000000',
     fontWeight: '500',
+  },
+  panel9: {
+    flex: 0.3,
+    backgroundColor: '#F0F0F0',
+    borderLeftWidth: 1,
+    borderLeftColor: '#808080',
+    padding: 6,
+    flexDirection: 'column',
+  },
+  panel9Content: {
+    flex: 1,
+    flexDirection: 'column',
+    minHeight: 0, // Important for flexbox scrolling
+  },
+  contestGroup: {
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRadius: 4,
+    padding: 6,
+    marginBottom: 6,
+    backgroundColor: '#FFFFFF',
+    flexShrink: 0,
+  },
+  groupBox1: {
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRadius: 4,
+    padding: 6,
+    marginBottom: 6,
+    backgroundColor: '#FFFFFF',
+    flexShrink: 0,
+  },
+  groupBox3: {
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRadius: 4,
+    padding: 4,
+    marginBottom: 6,
+    backgroundColor: '#FFFFFF',
+    flex: 1,
+    minHeight: 0, // Important for flexbox
+    overflow: 'hidden', // Prevent overflow
+    justifyContent: 'flex-start', // Align content to top
+  },
+  groupBoxTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 4,
+    marginTop: -4,
+    flexShrink: 0, // Don't shrink the title
+  },
+  label4: {
+    fontSize: 12,
+    color: '#000000',
+    width: 40,
+  },
+  label5: {
+    fontSize: 12,
+    color: '#000000',
+    marginLeft: 4,
+  },
+  label6: {
+    fontSize: 12,
+    color: '#000000',
+    width: 70,
+  },
+  label7: {
+    fontSize: 12,
+    color: '#000000',
+    width: 70,
+  },
+  label8: {
+    fontSize: 12,
+    color: '#000000',
+    marginLeft: 4,
+  },
+  label9: {
+    fontSize: 12,
+    color: '#000000',
+    width: 90,
+  },
+  label10: {
+    fontSize: 12,
+    color: '#000000',
+    marginRight: 4,
+  },
+  label17: {
+    fontSize: 12,
+    color: '#000000',
+    marginTop: 8,
+  },
+  label18: {
+    fontSize: 12,
+    color: '#000000',
+    width: 70,
+  },
+  stationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+    gap: 4,
+  },
+  edit4: {
+    flex: 1,
+    height: 23,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    paddingHorizontal: 4,
+    fontSize: 13,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
+  checkBox1Switch: {
+    marginRight: 4,
+  },
+  checkBox1Label: {
+    fontSize: 12,
+    color: '#000000',
+  },
+  comboBox: {
+    flex: 1,
+    height: 23,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    paddingHorizontal: 4,
+    justifyContent: 'center',
+    minWidth: 65,
+  },
+  comboBoxText: {
+    fontSize: 12,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
+  spinEditContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  spinEditInput: {
+    width: 45,
+    height: 24,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    paddingHorizontal: 4,
+    textAlign: 'center',
+    fontSize: 12,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
+  spinEditButton: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#E0E0E0',
+    borderWidth: 1,
+    borderColor: '#808080',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  spinEditButtonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  volumeSlider1: {
+    flex: 1,
+    height: 20,
+    marginHorizontal: 4,
+  },
+  exchangeEdit: {
+    flex: 1,
+    height: 23,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    paddingHorizontal: 4,
+    fontSize: 12,
+    fontFamily: 'Consolas',
+    color: '#000000',
+    marginTop: 4,
+  },
+  bandConditionsRow: {
+    flexDirection: 'row',
+    marginBottom: 2,
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
+    flexShrink: 1, // Allow row to shrink
+    minHeight: 0, // Important for flexbox vertical shrinking
+  },
+  bandConditionsCol: {
+    flex: 1,
+    minWidth: 0, // Important for flexbox to respect constraints
+    minHeight: 0, // Allow column to shrink vertically
+  },
+  activityColumn: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    minWidth: 0,
+    minHeight: 0,
+    paddingLeft: 4,
+  },
+  checkBoxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    flexShrink: 1, // Allow rows to shrink
+    minWidth: 0,
+    minHeight: 0, // Allow vertical shrinking
+  },
+  checkBoxLabel: {
+    fontSize: 12,
+    color: '#000000',
+    marginLeft: 4,
+  },
+  label11: {
+    fontSize: 12,
+    color: '#000000',
+    marginBottom: 4,
+    flexShrink: 0,
+  },
+  panel10: {
+    borderTopWidth: 1,
+    borderTopColor: '#808080',
+    paddingTop: 6,
+    paddingBottom: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexShrink: 0,
+    backgroundColor: '#F0F0F0',
+  },
+  toolButton1Container: {
+    position: 'relative',
+    flexDirection: 'row',
+    zIndex: 10,
+  },
+  toolButton1: {
+    minWidth: 72,
+    height: 30,
+    backgroundColor: '#E0E0E0',
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRightWidth: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  toolButton1Down: {
+    backgroundColor: '#C0C0C0',
+    borderWidth: 2,
+    borderColor: '#606060',
+  },
+  toolButton1Content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  playIcon: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderTopWidth: 5,
+    borderBottomWidth: 5,
+    borderTopColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: '#00FF00', // Green play icon
+    marginRight: 2,
+  },
+  toolButton1Text: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  toolButton1Dropdown: {
+    width: 20,
+    height: 30,
+    backgroundColor: '#E0E0E0',
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderLeftWidth: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownArrow: {
+    fontSize: 8,
+    color: '#000000',
+    lineHeight: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  runDropdownMenu: {
+    minWidth: 150,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  runDropdownItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  runDropdownItemSelected: {
+    backgroundColor: '#ADD8E6', // Light blue
+  },
+  runDropdownItemDisabled: {
+    opacity: 0.5,
+  },
+  runDropdownItemText: {
+    fontSize: 12,
+    color: '#000000',
+  },
+  runDropdownItemTextSelected: {
+    fontWeight: 'bold',
+  },
+  runDropdownItemTextDisabled: {
+    color: '#808080',
+  },
+  durationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });
 
