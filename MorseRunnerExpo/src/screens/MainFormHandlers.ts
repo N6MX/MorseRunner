@@ -264,7 +264,6 @@
 //     procedure ComboBox1Change(Sender: TObject);
 //     procedure FormClose(Sender: TObject; var Action: TCloseAction);
 //     procedure SpinEdit1Change(Sender: TObject);
-//     procedure CheckBox1Click(Sender: TObject);
 //     procedure CheckBoxClick(Sender: TObject);
 //     procedure SpinEdit2Change(Sender: TObject);
 //     procedure SpinEdit3Change(Sender: TObject);
@@ -274,8 +273,6 @@
 //     procedure About1Click(Sender: TObject);
 //     procedure Readme1Click(Sender: TObject);
 //     procedure Edit1Change(Sender: TObject);
-//     procedure RunMNUClick(Sender: TObject);
-//     procedure RunBtnClick(Sender: TObject);
 //     procedure ViewScoreBoardMNUClick(Sender: TObject);
 //     procedure ViewScoreTable1Click(Sender: TObject);
 //     procedure FormKeyUp(Sender: TObject; var Key: Word;
@@ -289,7 +286,6 @@
 //     procedure VolumeSlider1Change(Sender: TObject);
 //     procedure WebPage1Click(Sender: TObject);
 //     procedure Call1Click(Sender: TObject);
-//     procedure QSK1Click(Sender: TObject);
 //     procedure NWPMClick(Sender: TObject);
 //     procedure Pitch1Click(Sender: TObject);
 //     procedure Bw1Click(Sender: TObject);
@@ -306,7 +302,6 @@
 //     procedure Activity1Click(Sender: TObject);
 //     procedure Duration1Click(Sender: TObject);
 //     procedure Operator1Click(Sender: TObject);
-//     procedure StopMNUClick(Sender: TObject);
 //     procedure ListView2CustomDrawSubItem(Sender: TCustomListView;
 //       Item: TListItem; SubItem: Integer; State: TCustomDrawState;
 //       var DefaultDraw: Boolean);
@@ -356,7 +351,6 @@
 //     // function. See TArrlDx.GetExchangeTypes() for additional information.
 //     RecvExchTypes: TExchTypes;
 
-//     procedure Run(Value: TRunMode);
 //     procedure WipeBoxes;
 //     procedure PopupScoreWpx;
 //     procedure PopupScoreHst;
@@ -365,7 +359,6 @@
 //     function SetMyExchange(const AExchange: string) : Boolean;
 //     procedure SetDefaultRunMode(V : Integer);
 //     procedure SetMySerialNR;
-//     procedure SetQsk(Value: boolean);
 //     procedure SetWpm(AWpm : integer);
 //     function SetMyCall(ACall: string) : Boolean;
 //     procedure SetPitch(PitchNo: integer);
@@ -1771,12 +1764,6 @@
 //     SetWpm(SpinEdit1.Value);
 // end;
 
-// procedure TMainForm.CheckBox1Click(Sender: TObject);
-// begin
-//   SetQsk(CheckBox1.Checked);
-//   ActiveControl := Edit1;
-// end;
-
 // procedure TMainForm.CheckBoxClick(Sender: TObject);
 // begin
 //   ReadCheckboxes;
@@ -1903,14 +1890,6 @@
 //         CallSent := false;
 // end;
 
-
-// procedure TMainForm.RunMNUClick(Sender: TObject);
-// begin
-//   SetDefaultRunMode((Sender as TComponent).Tag);
-//   Run(DefaultRunMode);
-// end;
-
-
 // procedure TMainForm.Edit2Enter(Sender: TObject);
 // begin
 //   if Edit2IsRST then
@@ -1939,7 +1918,6 @@
 //   if Ctl is TSpinEdit then (Ctl as TSpinEdit).Color := Clr[AEnable]
 //   else if Ctl is TEdit then (Ctl as TEdit).Color := Clr[AEnable];
 // end;
-
 
 // procedure TMainForm.Run(Value: TRunMode);
 // const
@@ -2136,15 +2114,6 @@
 //   end;
 
 //   AlSoundOut1.Enabled := not BStop;
-// end;
-
-
-// procedure TMainForm.RunBtnClick(Sender: TObject);
-// begin
-//   if RunMode = rmStop then
-//     Run(DefaultRunMode)
-//   else
-//     Tst.FStopPressed := true;
 // end;
 
 // procedure TMainForm.WmTbDown(var Msg: TMessage);
@@ -2474,25 +2443,10 @@
 //   SetMyCall(UpperCase(Trim(InputBox('Callsign', 'Callsign', Edit4.Text))));
 // end;
 
-
-// procedure TMainForm.SetQsk(Value: boolean);
-// begin
-//   Qsk := Value;
-//   CheckBox1.Checked := Qsk;
-// end;
-
-
-// procedure TMainForm.QSK1Click(Sender: TObject);
-// begin
-//   SetQsk(not QSK1.Checked);
-// end;
-
-
 // procedure TMainForm.NWPMClick(Sender: TObject);
 // begin
 //   SetWpm((Sender as TMenuItem).Tag);
 // end;
-
 
 // procedure TMainForm.SetWpm(AWpm : integer);
 // begin
@@ -2775,12 +2729,6 @@
 //     end;
 // end;
 
-
-// procedure TMainForm.StopMNUClick(Sender: TObject);
-// begin
-//   Tst.FStopPressed := true;
-// end;
-
 // end.
 
 
@@ -2861,7 +2809,7 @@ export const useMainFormHandlers = () => {
   const [spinEdit3Value, setSpinEdit3Value] = useState(3);
   
   // Checkbox controls
-  const [checkBox1Checked, setCheckBox1Checked] = useState(false);
+  const [qsk, setQsk] = useState<boolean>(false);
   const [checkBox2Checked, setCheckBox2Checked] = useState(false);
   const [checkBox3Checked, setCheckBox3Checked] = useState(false);
   const [checkBox4Checked, setCheckBox4Checked] = useState(false);
@@ -3051,6 +2999,13 @@ export const useMainFormHandlers = () => {
     setRunButtonCaption('Stop');
   }, []);
   
+// procedure TMainForm.RunBtnClick(Sender: TObject);
+// begin
+//   if RunMode = rmStop then
+//     Run(DefaultRunMode)
+//   else
+//     Tst.FStopPressed := true;
+// end;
   const RunBtnClick = useCallback((sender: any, isDropdownArea?: boolean) => {
     console.log('RunBtnClick called', isDropdownArea ? '(dropdown area)' : '');
     // Toggle dropdown if stopped, or stop if running
@@ -3070,16 +3025,29 @@ export const useMainFormHandlers = () => {
     }
   }, [runButtonDown, runDropdownVisible, currentRunMode, handleRunModeSelect]);
 
+  // procedure TMainForm.SetQsk(Value: boolean);
+  // begin
+  //   Qsk := Value;
+  //   CheckBox1.Checked := Qsk;
+  // end;
+  const SetQsk = useCallback((value: boolean) => {
+    setQsk(value);
+  }, []);
+
   // ============================================================================
   // EVENT HANDLERS - Checkbox Events
   // ============================================================================
 
+  // procedure TMainForm.CheckBox1Click(Sender: TObject);
+  // begin
+  //   SetQsk(CheckBox1.Checked);
+  //   ActiveControl := Edit1;
+  // end;
   const CheckBox1Click = useCallback((sender: any) => {
     console.log('CheckBox1Click called');
-    // TODO: Implement from Pascal CheckBox1Click
-    // - SetQsk(CheckBox1.Checked)
-    // - Set ActiveControl to Edit1
-  }, []);
+    SetQsk(!qsk); // Toggle QSK
+    // Set ActiveControl to Edit1
+  }, [qsk, SetQsk]);
 
   const CheckBoxClick = useCallback((sender: any) => {
     console.log('CheckBoxClick called');
@@ -3237,6 +3205,11 @@ export const useMainFormHandlers = () => {
     // - Open readme.txt file
   }, []);
 
+  // procedure TMainForm.RunMNUClick(Sender: TObject);
+  // begin
+  //   SetDefaultRunMode((Sender as TComponent).Tag);
+  //   Run(DefaultRunMode);
+  // end;
   const RunMNUClick = useCallback((sender: any) => {
     console.log('RunMNUClick called with tag:', sender?.tag);
     // Map tag to mode: 1=Pile-Up, 2=Single Calls, 3=WPX Competition, 4=HST Competition
@@ -3250,6 +3223,10 @@ export const useMainFormHandlers = () => {
     handleRunModeSelect(mode);
   }, [handleRunModeSelect]);
 
+  // procedure TMainForm.StopMNUClick(Sender: TObject);
+  // begin
+  //   Tst.FStopPressed := true;
+  // end;
   const StopMNUClick = useCallback((sender: any) => {
     console.log('StopMNUClick called');
     // Stop the run
@@ -3283,11 +3260,14 @@ export const useMainFormHandlers = () => {
     // - InputBox for callsign, then SetMyCall
   }, []);
 
+  // procedure TMainForm.QSK1Click(Sender: TObject);
+  // begin
+  //   SetQsk(not QSK1.Checked);
+  // end;
   const QSK1Click = useCallback((sender: any) => {
     console.log('QSK1Click called');
-    // TODO: Implement from Pascal QSK1Click
-    // - SetQsk(not QSK1.Checked)
-  }, []);
+    SetQsk(!qsk); // Toggle QSK
+  }, [qsk, SetQsk]);
 
   const NWPMClick = useCallback((sender: any) => {
     console.log('NWPMClick called');
@@ -3463,7 +3443,7 @@ export const useMainFormHandlers = () => {
     spinEdit1Value, setSpinEdit1Value,
     spinEdit2Value, setSpinEdit2Value,
     spinEdit3Value, setSpinEdit3Value,
-    checkBox1Checked, setCheckBox1Checked,
+    qsk, setQsk,
     checkBox2Checked, setCheckBox2Checked,
     checkBox3Checked, setCheckBox3Checked,
     checkBox4Checked, setCheckBox4Checked,
@@ -3534,6 +3514,7 @@ export const useMainFormHandlers = () => {
     // Checkbox event handlers
     CheckBox1Click,
     CheckBoxClick,
+    SetQsk,
     
     // SpinEdit event handlers
     SpinEdit1Change,
