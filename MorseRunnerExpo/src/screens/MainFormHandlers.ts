@@ -258,7 +258,6 @@
 //       MousePos: TPoint; var Handled: Boolean);
 //     procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
 //       MousePos: TPoint; var Handled: Boolean);
-//     procedure SendClick(Sender: TObject);
 //     procedure Edit4Change(Sender: TObject);
 //     procedure ComboBox2Change(Sender: TObject);
 //     procedure ComboBox1Change(Sender: TObject);
@@ -332,7 +331,6 @@
 //     procedure RestoreRecvFields;
 //     procedure ResizeRecvFields;
 //     procedure ProcessSpace;
-//     procedure SendMsg(AMsg: TStationMessage);
 //     procedure ProcessEnter;
 //     procedure EnableCtl(Ctl: TWinControl; AEnable: boolean);
 //     procedure WmTbDown(var Msg: TMessage); message WM_TBDOWN;
@@ -519,68 +517,11 @@
 //   end;
 // end;
 
-
 // procedure TMainForm.AlSoundOut1BufAvailable(Sender: TObject);
 // begin
 //   if AlSoundOut1.Enabled then
 //     AlSoundOut1.PutData(Tst.GetAudio);
 // end;
-
-
-// procedure TMainForm.SendClick(Sender: TObject);
-// var
-//   Msg: TStationMessage;
-// begin
-//   // Validate MenuItem tags
-//   assert(CQ1.Tag = Ord(msgCQ));               // CQ     F1
-//   assert(Exchange1.Tag = Ord(msgNR));         // Exch   F2
-//   assert(TU1.Tag = Ord(msgTU));               // TU     F3
-//   assert(MyCall1.Tag = Ord(msgMyCall));       // <my>   F4
-//   assert(HisCall1.Tag = Ord(msgHisCall));     // <his>  F5
-//   assert(QSOB41.Tag = Ord(msgB4));            // B4     F6
-//   assert(N1.Tag = Ord(msgQm));                // ?      F7
-//   assert(AGN1.Tag = Ord(msgNIL));             // NIL    F8
-//   assert(NRQM.Tag = Ord(msgNrQm));            // NR?    F12
-
-//   // Validate Control button tags
-//   assert(SpeedButton4.Tag = Ord(msgCQ));      // CQ     F1
-//   assert(SpeedButton5.Tag = Ord(msgNR));      // Exch   F2
-//   assert(SpeedButton6.Tag = Ord(msgTU));      // TU     F3
-//   assert(SpeedButton7.Tag = Ord(msgMyCall));  // <my>   F4
-//   assert(SpeedButton8.Tag = Ord(msgHisCall)); // <his>  F5
-//   assert(SpeedButton9.Tag = Ord(msgB4));      // B4     F6
-//   assert(SpeedButton10.Tag = Ord(msgQm));     // ?      F7
-//   assert(SpeedButton11.Tag = Ord(msgNIL));    // NIL    F8
-
-//   Msg := TStationMessage((Sender as TComponent).Tag);
-
-//   SendMsg(Msg);
-// end;
-
-
-// {
-//   SendMsg() is called whenever MyStation sends a new CW Message.
-// }
-// procedure TMainForm.SendMsg(AMsg: TStationMessage);
-// begin
-//   // special case for CW Speed control having focus and user presses
-//   // a key or function key (which do not cause a leave-focus event).
-//   if SpinEdit1.Focused then
-//     SpinEdit1Exit(SpinEdit1);
-
-//   if AMsg = msgHisCall then begin
-//     // retain current callsign, including ''.
-//     Tst.SetHisCall(Edit1.Text);   // virtual; sets Tst.Me.HisCall and Log.CallSent
-
-//     // update "received" Exchange field types. Some contests change field
-//     // types based on MyCall and/or DX station's call (Tst.Me.HisCall).
-//     RecvExchTypes:= Tst.GetRecvExchTypes(skMyStation, Tst.Me.MyCall, Tst.Me.HisCall);
-//   end;
-//   if AMsg = msgNR then
-//     NrSent := true;
-//   Tst.Me.SendMsg(AMsg);
-// end;
-
 
 // procedure TMainForm.Edit1KeyPress(Sender: TObject; var Key: Char);
 // begin
@@ -2737,6 +2678,7 @@
 
 
 import { useState, useCallback, useRef } from 'react';
+import * as Station from '../data/Station';
 
 // Constants
 const sVersion = '1.85.3+'; // Sets version strings in UI panel
@@ -2983,12 +2925,97 @@ export const useMainFormHandlers = () => {
   // EVENT HANDLERS - Button Events
   // ============================================================================
 
-  const SendClick = useCallback((sender: any) => {
-    console.log('SendClick called');
-    // TODO: Implement from Pascal SendClick
-    // - Get message from sender Tag
-    // - Call SendMsg with appropriate TStationMessage
+  // procedure TMainForm.SendMsg(AMsg: TStationMessage);
+  // begin
+  //   // special case for CW Speed control having focus and user presses
+  //   // a key or function key (which do not cause a leave-focus event).
+  //   if SpinEdit1.Focused then
+  //     SpinEdit1Exit(SpinEdit1);
+
+  //   if AMsg = msgHisCall then begin
+  //     // retain current callsign, including ''.
+  //     Tst.SetHisCall(Edit1.Text);   // virtual; sets Tst.Me.HisCall and Log.CallSent
+
+  //     // update "received" Exchange field types. Some contests change field
+  //     // types based on MyCall and/or DX station's call (Tst.Me.HisCall).
+  //     RecvExchTypes:= Tst.GetRecvExchTypes(skMyStation, Tst.Me.MyCall, Tst.Me.HisCall);
+  //   end;
+  //   if AMsg = msgNR then
+  //     NrSent := true;
+  //   Tst.Me.SendMsg(AMsg);
+  // end;
+
+  // SendMsg() is called whenever MyStation sends a new CW Message.
+  // TODO: Full implementation - connect to contest simulator/test instance
+  const SendMsg = useCallback((msg: Station.TStationMessage) => {
+    console.log('SendMsg called with message:', msg);
+    // TODO: Implement full SendMsg logic from Pascal:
+    // - Handle special case for CW Speed control having focus
+    // - If msg = msgHisCall: SetHisCall(Edit1.Text) and update RecvExchTypes
+    // - If msg = msgNR: Set NrSent = true
+    // - Call Tst.Me.SendMsg(AMsg) - send message to my station
   }, []);
+
+  // procedure TMainForm.SendClick(Sender: TObject);
+  // var
+  //   Msg: TStationMessage;
+  // begin
+  //   // Validate MenuItem tags
+  //   assert(CQ1.Tag = Ord(msgCQ));               // CQ     F1
+  //   assert(Exchange1.Tag = Ord(msgNR));         // Exch   F2
+  //   assert(TU1.Tag = Ord(msgTU));               // TU     F3
+  //   assert(MyCall1.Tag = Ord(msgMyCall));       // <my>   F4
+  //   assert(HisCall1.Tag = Ord(msgHisCall));     // <his>  F5
+  //   assert(QSOB41.Tag = Ord(msgB4));            // B4     F6
+  //   assert(N1.Tag = Ord(msgQm));                // ?      F7
+  //   assert(AGN1.Tag = Ord(msgNIL));             // NIL    F8
+  //   assert(NRQM.Tag = Ord(msgNrQm));            // NR?    F12
+
+  //   // Validate Control button tags
+  //   assert(SpeedButton4.Tag = Ord(msgCQ));      // CQ     F1
+  //   assert(SpeedButton5.Tag = Ord(msgNR));      // Exch   F2
+  //   assert(SpeedButton6.Tag = Ord(msgTU));      // TU     F3
+  //   assert(SpeedButton7.Tag = Ord(msgMyCall));  // <my>   F4
+  //   assert(SpeedButton8.Tag = Ord(msgHisCall)); // <his>  F5
+  //   assert(SpeedButton9.Tag = Ord(msgB4));      // B4     F6
+  //   assert(SpeedButton10.Tag = Ord(msgQm));     // ?      F7
+  //   assert(SpeedButton11.Tag = Ord(msgNIL));    // NIL    F8
+
+  //   Msg := TStationMessage((Sender as TComponent).Tag);
+
+  //   SendMsg(Msg);
+  // end;
+  const SendClick = useCallback((sender: any) => {
+    console.log('SendClick called with sender:', sender);
+    // Get message from sender Tag
+    // Pascal: Msg := TStationMessage((Sender as TComponent).Tag);
+    const tag = sender?.tag;
+    if (tag === undefined || tag === null) {
+      console.warn('SendClick: sender.tag is missing');
+      return;
+    }
+
+    // Convert tag to TStationMessage enum
+    // Pascal enum: msgNone=0, msgCQ=1, msgNR=2, msgTU=3, msgMyCall=4, msgHisCall=5, msgB4=6, msgQm=7, msgNIL=8
+    let msg: Station.TStationMessage | null = null;
+    switch (tag) {
+      case 1: msg = Station.TStationMessage.CQ; break;
+      case 2: msg = Station.TStationMessage.NR; break;
+      case 3: msg = Station.TStationMessage.TU; break;
+      case 4: msg = Station.TStationMessage.MY_CALL; break;
+      case 5: msg = Station.TStationMessage.HIS_CALL; break;
+      case 6: msg = Station.TStationMessage.B4; break;
+      case 7: msg = Station.TStationMessage.QM; break;
+      case 8: msg = Station.TStationMessage.NIL; break;
+      case 12: msg = Station.TStationMessage.NR_QM; break; // NR? F12
+      default:
+        console.warn(`SendClick: Invalid tag value: ${tag}`);
+        return;
+    }
+
+    // Call SendMsg with appropriate TStationMessage
+    SendMsg(msg);
+  }, [SendMsg]);
 
   const handleRunModeSelect = useCallback((mode: string) => {
     console.log('handleRunModeSelect called with mode:', mode);
@@ -2998,14 +3025,14 @@ export const useMainFormHandlers = () => {
     setRunButtonDown(true);
     setRunButtonCaption('Stop');
   }, []);
-  
-// procedure TMainForm.RunBtnClick(Sender: TObject);
-// begin
-//   if RunMode = rmStop then
-//     Run(DefaultRunMode)
-//   else
-//     Tst.FStopPressed := true;
-// end;
+
+  // procedure TMainForm.RunBtnClick(Sender: TObject);
+  // begin
+  //   if RunMode = rmStop then
+  //     Run(DefaultRunMode)
+  //   else
+  //     Tst.FStopPressed := true;
+  // end;
   const RunBtnClick = useCallback((sender: any, isDropdownArea?: boolean) => {
     console.log('RunBtnClick called', isDropdownArea ? '(dropdown area)' : '');
     // Toggle dropdown if stopped, or stop if running

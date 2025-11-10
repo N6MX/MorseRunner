@@ -1,5 +1,5 @@
 import { Contest, ContestType, ContestDefinition, CONTEST_DEFINITIONS } from '../data/Contest';
-import { Station, StationState, StationMessage } from '../data/Station';
+import { Station, StationState, TStationMessage } from '../data/Station';
 import AudioEngine from './AudioEngine';
 import DataLoader from './DataLoader';
 
@@ -129,32 +129,32 @@ class ContestManager {
   }
 
   // Port from Contest.pas - SendMsg function
-  async sendMessage(station: Station, message: StationMessage): Promise<void> {
+  async sendMessage(station: Station, message: TStationMessage): Promise<void> {
     let messageText = '';
     
     switch (message) {
-      case StationMessage.CQ:
+      case TStationMessage.CQ:
         messageText = 'CQ CQ CQ';
         break;
-      case StationMessage.NR:
+      case TStationMessage.NR:
         messageText = station.nrAsText();
         break;
-      case StationMessage.TU:
+      case TStationMessage.TU:
         messageText = 'TU';
         break;
-      case StationMessage.MY_CALL:
+      case TStationMessage.MY_CALL:
         messageText = this.myStation.myCall;
         break;
-      case StationMessage.HIS_CALL:
+      case TStationMessage.HIS_CALL:
         messageText = station.hisCall;
         break;
-      case StationMessage.B4:
+      case TStationMessage.B4:
         messageText = 'B4';
         break;
-      case StationMessage.QM:
+      case TStationMessage.QM:
         messageText = '?';
         break;
-      case StationMessage.NIL:
+      case TStationMessage.NIL:
         messageText = 'NIL';
         break;
       default:

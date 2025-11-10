@@ -6,7 +6,7 @@ export enum StationState {
   SENDING = 'sending',
 }
 
-export enum StationMessage {
+export enum TStationMessage {
   NONE = 'none',
   CQ = 'cq',
   NR = 'nr',

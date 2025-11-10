@@ -1,0 +1,14 @@
+{
+  "name": "morserunner",
+  "version": "1.0.0",
+  "description": "MorseRunner - Morse Code Training Application",
+  "scripts": {
+    "start": "cd MorseRunnerExpo && npm start",
+    "expo:start": "cd MorseRunnerExpo && npm start",
+    "expo:android": "cd MorseRunnerExpo && npm run android",
+    "expo:ios": "cd MorseRunnerExpo && npm run ios",
+    "expo:web": "cd MorseRunnerExpo && npm run web"
+  },
+  "private": true
+}
+

@@ -1,5 +1,5 @@
 import { ContestCall } from '../data/Contest';
-import { Station, StationState, StationMessage } from '../data/Station';
+import * as Station from '../data/Station';
 import AudioEngine from './AudioEngine';
 import DataLoader from './DataLoader';
 import SettingsService from './SettingsService';
@@ -13,10 +13,10 @@ export interface SimulatedStation {
   pitch: number;
   volume: number;
   amplitude: number;
-  state: StationState;
+  state: Station.StationState;
   lastAction: number; // timestamp
   nextAction: number; // timestamp
-  messageQueue: StationMessage[];
+  messageQueue: Station.TStationMessage[];
   isMultiplier: boolean;
   isNewMultiplier: boolean;
   strength: number; // signal strength 1-9
@@ -143,7 +143,7 @@ class ContestSimulator {
   // Update existing stations
   private updateStations(now: number): void {
     for (const station of this.stations) {
-      if (station.state === StationState.LISTENING && now >= station.nextAction) {
+      if (station.state === Station.StationState.LISTENING && now >= station.nextAction) {
         this.processStationAction(station, now);
       }
     }
@@ -159,7 +159,7 @@ class ContestSimulator {
     const message = station.messageQueue.shift();
     if (message) {
       // Only send CQ calls, not responses, unless we're in a conversation
-      if (message === StationMessage.CQ || station.state === StationState.SENDING) {
+      if (message === Station.TStationMessage.CQ || station.state === Station.StationState.SENDING) {
         this.sendStationMessage(station, message);
         station.lastAction = now;
         station.nextAction = now + this.getNextActionDelay();
@@ -174,9 +174,9 @@ class ContestSimulator {
   private generateStationMessageSequence(station: SimulatedStation): void {
     // Only generate CQ sequences for new stations
     const sequences = [
-      [StationMessage.CQ, StationMessage.MY_CALL, StationMessage.MY_CALL],
-      [StationMessage.CQ, StationMessage.MY_CALL],
-      [StationMessage.CQ, StationMessage.MY_CALL, StationMessage.MY_CALL, StationMessage.MY_CALL],
+      [Station.TStationMessage.CQ, Station.TStationMessage.MY_CALL, Station.TStationMessage.MY_CALL],
+      [Station.TStationMessage.CQ, Station.TStationMessage.MY_CALL],
+      [Station.TStationMessage.CQ, Station.TStationMessage.MY_CALL, Station.TStationMessage.MY_CALL, Station.TStationMessage.MY_CALL],
     ];
 
     const sequence = sequences[Math.floor(Math.random() * sequences.length)];
@@ -184,23 +184,23 @@ class ContestSimulator {
   }
 
   // Send a message from a station
-  private sendStationMessage(station: SimulatedStation, message: StationMessage): void {
+  private sendStationMessage(station: SimulatedStation, message: Station.TStationMessage): void {
     let text = '';
     
     switch (message) {
-      case StationMessage.CQ:
+      case Station.TStationMessage.CQ:
         text = 'CQ CQ CQ';
         break;
-      case StationMessage.MY_CALL:
+      case Station.TStationMessage.MY_CALL:
         text = station.call;
         break;
-      case StationMessage.HIS_CALL:
+      case Station.TStationMessage.HIS_CALL:
         text = this.myCall;
         break;
-      case StationMessage.NR:
+      case Station.TStationMessage.NR:
         text = `${station.exchange1} ${station.exchange2}`;
         break;
-      case StationMessage.TU:
+      case Station.TStationMessage.TU:
         text = 'TU';
         break;
       default:
@@ -265,7 +265,7 @@ class ContestSimulator {
       pitch: settings.pitch + Math.floor(Math.random() * 100) - 50, // +/- 50 Hz from user setting
       volume: settings.volume * (0.5 + Math.random() * 0.5), // 50-100% of user volume
       amplitude: 1.0,
-      state: StationState.LISTENING,
+      state: Station.StationState.LISTENING,
       lastAction: Date.now(),
       nextAction: Date.now() + 1000 + Math.random() * 5000,
       messageQueue: [],
@@ -302,8 +302,8 @@ class ContestSimulator {
   }
 
   // Handle user sending a message (like CQ)
-  onUserMessage(message: StationMessage): void {
-    if (message === StationMessage.CQ) {
+  onUserMessage(message: Station.TStationMessage): void {
+    if (message === Station.TStationMessage.CQ) {
       // When user calls CQ, some stations might respond
       this.handleCQResponse();
     }
@@ -318,13 +318,13 @@ class ContestSimulator {
       
       // Generate response sequence for the new station
       const responseSequence = [
-        StationMessage.HIS_CALL, // Your call
-        StationMessage.MY_CALL,  // Their call
-        StationMessage.NR        // Their exchange
+        Station.TStationMessage.HIS_CALL, // Your call
+        Station.TStationMessage.MY_CALL,  // Their call
+        Station.TStationMessage.NR        // Their exchange
       ];
       
       newStation.messageQueue = [...responseSequence];
-      newStation.state = StationState.SENDING;
+      newStation.state = Station.StationState.SENDING;
       newStation.nextAction = Date.now() + 2000 + Math.random() * 3000; // Respond in 2-5 seconds
     }
 
@@ -336,13 +336,13 @@ class ContestSimulator {
     for (const station of respondingStations) {
       // Generate response sequence
       const responseSequence = [
-        StationMessage.HIS_CALL, // Your call
-        StationMessage.MY_CALL,  // Their call
-        StationMessage.NR        // Their exchange
+        Station.TStationMessage.HIS_CALL, // Your call
+        Station.TStationMessage.MY_CALL,  // Their call
+        Station.TStationMessage.NR        // Their exchange
       ];
       
       station.messageQueue = [...responseSequence];
-      station.state = StationState.SENDING;
+      station.state = Station.StationState.SENDING;
       station.nextAction = Date.now() + 2000 + Math.random() * 3000; // Respond in 2-5 seconds
     }
   }
