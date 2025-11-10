@@ -7,7 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import SettingsService from '../services/SettingsService';
+import * as Ini from '../services/Ini';
 import AudioEngine from '../services/AudioEngine';
 
 interface AudioControlsProps {
@@ -33,7 +33,7 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
   }, [isVisible]);
 
   const loadSettings = async () => {
-    const settings = SettingsService.getSettings();
+    const settings = Ini.Ini.getSettings();
     setVolume(settings.volume);
     setPitch(settings.pitch);
     setWpm(settings.wpm);
@@ -46,42 +46,42 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
 
   const handleVolumeChange = async (value: number) => {
     setVolume(value);
-    await SettingsService.updateSetting('volume', value);
+    await Ini.Ini.updateSetting('volume', value);
   };
 
   const handlePitchChange = async (value: number) => {
     setPitch(value);
-    await SettingsService.updateSetting('pitch', value);
+    await Ini.Ini.updateSetting('pitch', value);
   };
 
   const handleWpmChange = async (value: number) => {
     console.log('WPM slider changed to:', value);
     setWpm(value);
-    await SettingsService.updateSetting('wpm', value);
+    await Ini.Ini.updateSetting('wpm', value);
     console.log('WPM setting saved:', value);
   };
 
   const handleVibrationToggle = async () => {
     const newValue = !vibrationEnabled;
     setVibrationEnabled(newValue);
-    await SettingsService.updateSetting('vibrationEnabled', newValue);
+    await Ini.Ini.updateSetting('vibrationEnabled', newValue);
   };
 
   const handleAudioToggle = async () => {
     const newValue = !audioEnabled;
     setAudioEnabled(newValue);
-    await SettingsService.updateSetting('audioEnabled', newValue);
+    await Ini.Ini.updateSetting('audioEnabled', newValue);
   };
 
   const handleWhiteNoiseToggle = async () => {
     const newValue = !whiteNoiseEnabled;
     setWhiteNoiseEnabled(newValue);
-    await SettingsService.updateSetting('whiteNoiseEnabled', newValue);
+    await Ini.Ini.updateSetting('whiteNoiseEnabled', newValue);
   };
 
   const handleWhiteNoiseVolumeChange = async (value: number) => {
     setWhiteNoiseVolume(value);
-    await SettingsService.updateSetting('whiteNoiseVolume', value);
+    await Ini.Ini.updateSetting('whiteNoiseVolume', value);
   };
 
   const handleRxBandwidthChange = async (value: number) => {
@@ -89,7 +89,7 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
     const roundedValue = Math.round(value / 50) * 50;
     const clampedValue = Math.max(100, Math.min(600, roundedValue));
     setRxBandwidth(clampedValue);
-    await SettingsService.updateSetting('rxBandwidth', clampedValue);
+    await Ini.Ini.updateSetting('rxBandwidth', clampedValue);
     
     // Restart white noise with new bandwidth
     await AudioEngine.restartWhiteNoise();
@@ -127,7 +127,7 @@ const AudioControls: React.FC<AudioControlsProps> = ({ isVisible, onClose }) => 
     setPitch(newPitch);
     setWpm(newWpm);
 
-    await SettingsService.updateSettings({
+    await Ini.Ini.updateSettings({
       volume: newVolume,
       pitch: newPitch,
       wpm: newWpm,

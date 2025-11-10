@@ -263,7 +263,6 @@
 //     procedure ComboBox1Change(Sender: TObject);
 //     procedure FormClose(Sender: TObject; var Action: TCloseAction);
 //     procedure SpinEdit1Change(Sender: TObject);
-//     procedure CheckBoxClick(Sender: TObject);
 //     procedure SpinEdit2Change(Sender: TObject);
 //     procedure SpinEdit3Change(Sender: TObject);
 //     procedure PaintBox1Paint(Sender: TObject);
@@ -361,7 +360,6 @@
 //     function SetMyCall(ACall: string) : Boolean;
 //     procedure SetPitch(PitchNo: integer);
 //     procedure SetBw(BwNo: integer);
-//     procedure ReadCheckboxes;
 //     procedure UpdateTitleBar;
 //     procedure PostHiScore(const sScore: string);
 //     procedure UpdSerialNR(V: integer {TSerialNRTypes});
@@ -1705,23 +1703,6 @@
 //     SetWpm(SpinEdit1.Value);
 // end;
 
-// procedure TMainForm.CheckBoxClick(Sender: TObject);
-// begin
-//   ReadCheckboxes;
-//   ActiveControl := Edit1;
-// end;
-
-
-// procedure TMainForm.ReadCheckboxes;
-// begin
-//   Ini.Qrn := CheckBox4.Checked;
-//   Ini.Qrm := CheckBox3.Checked;
-//   Ini.Qsb := CheckBox2.Checked;
-//   Ini.Flutter := CheckBox5.Checked;
-//   Ini.Lids := CheckBox6.Checked;
-// end;
-
-
 // procedure TMainForm.SpinEdit2Change(Sender: TObject);
 // begin
 //   Ini.Duration := SpinEdit2.Value;
@@ -2679,6 +2660,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import * as Station from '../data/Station';
+import * as Ini from '../services/Ini';
 
 // Constants
 const sVersion = '1.85.3+'; // Sets version strings in UI panel
@@ -2693,6 +2675,7 @@ export const useMainFormHandlers = () => {
   const userExchangeDirtyRef = useRef<boolean>(false);
   const cwSpeedDirtyRef = useRef<boolean>(false);
   const ritLocalRef = useRef<number>(0);
+  const edit1Ref = useRef<(() => void) | null>(null); // Function to focus Edit1 TextInput (equivalent to Pascal ActiveControl)
 
   // Public state
   const [competitionMode, setPanel11CompetitionMode] = useState<boolean>(false);
@@ -2774,6 +2757,12 @@ export const useMainFormHandlers = () => {
 
   const FormCreate = useCallback((sender: any) => {
     console.log('FormCreate called');
+    // Store Edit1 focus function if provided (for ActiveControl functionality)
+    if (sender?.edit1Ref) {
+      edit1Ref.current = () => {
+        sender.edit1Ref.current?.focus();
+      };
+    }
     // TODO: Implement initialization logic from Pascal FormCreate
     // - Randomize
     // - Set up RichEdit1
@@ -3073,15 +3062,46 @@ export const useMainFormHandlers = () => {
   const CheckBox1Click = useCallback((sender: any) => {
     console.log('CheckBox1Click called');
     SetQsk(!qsk); // Toggle QSK
-    // Set ActiveControl to Edit1
+    // Set ActiveControl to Edit1 - focus the callsign input field
+    if (edit1Ref.current) {
+      edit1Ref.current();
+    }
   }, [qsk, SetQsk]);
 
+  // procedure TMainForm.ReadCheckboxes;
+  // begin
+  //   Ini.Qrn := CheckBox4.Checked;
+  //   Ini.Qrm := CheckBox3.Checked;
+  //   Ini.Qsb := CheckBox2.Checked;
+  //   Ini.Flutter := CheckBox5.Checked;
+  //   Ini.Lids := CheckBox6.Checked;
+  // end;
+  const ReadCheckboxes = useCallback(async () => {
+    // Read checkbox states and update settings
+    // Pascal: CheckBox4 = QRN, CheckBox3 = QRM, CheckBox2 = QSB, CheckBox5 = Flutter, CheckBox6 = LIDs
+    await Ini.Ini.updateSettings({
+      qrn: checkBox4Checked,
+      qrm: checkBox3Checked,
+      qsb: checkBox2Checked,
+      flutter: checkBox5Checked,
+      lids: checkBox6Checked,
+    });
+  }, [checkBox2Checked, checkBox3Checked, checkBox4Checked, checkBox5Checked, checkBox6Checked]);
+
+  // procedure TMainForm.CheckBoxClick(Sender: TObject);
+  // begin
+  //   ReadCheckboxes;
+  //   ActiveControl := Edit1;
+  // end;
   const CheckBoxClick = useCallback((sender: any) => {
     console.log('CheckBoxClick called');
-    // TODO: Implement from Pascal CheckBoxClick
-    // - ReadCheckboxes
-    // - Set ActiveControl to Edit1
-  }, []);
+    // Read checkbox states and update settings
+    ReadCheckboxes();
+    // Set ActiveControl to Edit1 - focus the callsign input field
+    if (edit1Ref.current) {
+      edit1Ref.current();
+    }
+  }, [ReadCheckboxes]);
 
   // ============================================================================
   // EVENT HANDLERS - SpinEdit Events
@@ -3429,7 +3449,6 @@ export const useMainFormHandlers = () => {
   // - SetMyCall(ACall: string): Boolean
   // - SetPitch(PitchNo: integer)
   // - SetBw(BwNo: integer)
-  // - ReadCheckboxes()
   // - UpdateTitleBar()
   // - PostHiScore(const sScore: string)
   // - UpdSerialNR(V: integer)

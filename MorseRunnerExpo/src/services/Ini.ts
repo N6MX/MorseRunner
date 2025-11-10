@@ -14,6 +14,11 @@ export interface UserSettings {
   whiteNoiseEnabled: boolean;
   whiteNoiseVolume: number;
   rxBandwidth: number; // 100Hz to 600Hz in 50Hz increments
+  qrn: boolean; // QRN (noise) band condition
+  qrm: boolean; // QRM (interference) band condition
+  qsb: boolean; // QSB (fading) band condition
+  flutter: boolean; // Flutter band condition
+  lids: boolean; // LIDs (Less Intelligent Design) band condition
 }
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -29,6 +34,11 @@ const DEFAULT_SETTINGS: UserSettings = {
   whiteNoiseEnabled: true,
   whiteNoiseVolume: 0.3,
   rxBandwidth: 300, // Default to 300Hz bandwidth
+  qrn: false,
+  qrm: false,
+  qsb: false,
+  flutter: false,
+  lids: false,
 };
 
 const SETTINGS_KEY = 'morserunner_settings';
@@ -146,4 +156,4 @@ class SettingsService {
   }
 }
 
-export default new SettingsService();
+export const Ini = new SettingsService();

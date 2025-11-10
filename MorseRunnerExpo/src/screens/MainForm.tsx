@@ -552,14 +552,15 @@ const MainForm: React.FC = () => {
   const handlers = useMainFormHandlers();
   const [dropdownButtonLayout, setDropdownButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const buttonContainerRef = useRef<View>(null);
+  const edit1Ref = useRef<TextInput>(null);
 
   // Initialize form on mount
   useEffect(() => {
-    handlers.FormCreate(null);
+    handlers.FormCreate({ edit1Ref });
     return () => {
       handlers.FormDestroy(null);
     };
-  }, []);
+  }, [handlers]);
 
   // Update button position when dropdown becomes visible
   useEffect(() => {
@@ -1089,6 +1090,7 @@ const MainForm: React.FC = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.label1}>Call</Text>
               <TextInput
+                ref={edit1Ref}
                 style={styles.edit1}
                 value={handlers.edit1Text}
                 onChangeText={handlers.setEdit1Text}

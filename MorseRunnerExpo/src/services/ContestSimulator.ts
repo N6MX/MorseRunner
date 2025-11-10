@@ -2,7 +2,7 @@ import { ContestCall } from '../data/Contest';
 import * as Station from '../data/Station';
 import AudioEngine from './AudioEngine';
 import DataLoader from './DataLoader';
-import SettingsService from './SettingsService';
+import * as Ini from './Ini';
 
 export interface SimulatedStation {
   id: string;
@@ -254,7 +254,7 @@ class ContestSimulator {
   // Create a new station
   private createNewStation(): SimulatedStation {
     const callData = this.callHistory[Math.floor(Math.random() * this.callHistory.length)];
-    const settings = SettingsService.getSettings();
+    const settings = Ini.Ini.getSettings();
     
     return {
       id: `station_${Date.now()}_${Math.random()}`,

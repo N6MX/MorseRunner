@@ -1,7 +1,7 @@
 import { Audio } from 'expo-av';
 import { Vibration } from 'react-native';
 import { encodeToMorse } from '../utils/MorseTable';
-import SettingsService from './SettingsService';
+import * as Ini from './Ini';
 
 class AudioEngine {
   private isPlaying: boolean = false;
@@ -54,7 +54,7 @@ class AudioEngine {
         this.shouldStop = false;
         
         // Get settings
-        const settings = SettingsService.getSettings();
+        const settings = Ini.Ini.getSettings();
         const actualWpm = wpm || settings.wpm;
         const pitch = settings.pitch;
         const volume = settings.volume;
@@ -295,7 +295,7 @@ class AudioEngine {
   // Pre-generate common tones for faster playback
   private async preGenerateTones(): Promise<void> {
     try {
-      const settings = SettingsService.getSettings();
+      const settings = Ini.Ini.getSettings();
       const pitch = settings.pitch;
       const volume = settings.volume;
       
@@ -430,7 +430,7 @@ class AudioEngine {
     if (this.isNoisePlaying) return;
 
     try {
-      const settings = SettingsService.getSettings();
+      const settings = Ini.Ini.getSettings();
       console.log(`Starting real-time white noise: audioEnabled=${settings.audioEnabled}, whiteNoiseEnabled=${settings.whiteNoiseEnabled}, volume=${settings.whiteNoiseVolume}`);
       
       if (!settings.audioEnabled || !settings.whiteNoiseEnabled) {
@@ -781,7 +781,7 @@ class AudioEngine {
     const filteredReIm = this.applyComplexFiltering(reIm, sampleRate, bandwidth);
     
     // Modulate exactly like original: Result := Modul.Modulate(ReIm);
-    const settings = SettingsService.getSettings();
+    const settings = Ini.Ini.getSettings();
     const modulatedData = this.modulateComplexToPitch(filteredReIm, sampleRate, settings.pitch);
     
     // AGC processing exactly like original: Result := Agc.Process(Result);
