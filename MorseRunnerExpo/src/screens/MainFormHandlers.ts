@@ -247,7 +247,6 @@
 //     procedure FormCreate(Sender: TObject);
 //     procedure AlSoundOut1BufAvailable(Sender: TObject);
 //     procedure FormDestroy(Sender: TObject);
-//     procedure Edit1KeyPress(Sender: TObject; var Key: Char);
 //     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
 //     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
 //     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -270,7 +269,6 @@
 //     procedure FirstTime1Click(Sender: TObject);
 //     procedure About1Click(Sender: TObject);
 //     procedure Readme1Click(Sender: TObject);
-//     procedure Edit1Change(Sender: TObject);
 //     procedure ViewScoreBoardMNUClick(Sender: TObject);
 //     procedure ViewScoreTable1Click(Sender: TObject);
 //     procedure FormKeyUp(Sender: TObject; var Key: Word;
@@ -519,12 +517,6 @@
 // begin
 //   if AlSoundOut1.Enabled then
 //     AlSoundOut1.PutData(Tst.GetAudio);
-// end;
-
-// procedure TMainForm.Edit1KeyPress(Sender: TObject; var Key: Char);
-// begin
-//   if not CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '/', '?', #8]) then
-//     Key := #0;
 // end;
 
 // procedure TMainForm.Edit2KeyPress(Sender: TObject; var Key: Char);
@@ -1798,20 +1790,6 @@
 //     ShellExecute(GetDesktopWindow, 'open', PChar(FileName), '', '', SW_SHOWNORMAL);
 // end;
 
-
-// {
-//   Called whenever callsign field (Edit1) changes. Any callsign edit will
-//   invalidate the callsign already sent by clearing the CallSent value.
-//   If the Callsign is empty, also clear the NrSent value.
-// }
-// procedure TMainForm.Edit1Change(Sender: TObject);
-// begin
-//     if Edit1.Text = '' then
-//         NrSent := false;
-//     if not Tst.Me.UpdateCallInMessage(Edit1.Text) then
-//         CallSent := false;
-// end;
-
 // procedure TMainForm.Edit2Enter(Sender: TObject);
 // begin
 //   if Edit2IsRST then
@@ -2676,6 +2654,8 @@ export const useMainFormHandlers = () => {
   const cwSpeedDirtyRef = useRef<boolean>(false);
   const ritLocalRef = useRef<number>(0);
   const edit1Ref = useRef<(() => void) | null>(null); // Function to focus Edit1 TextInput (equivalent to Pascal ActiveControl)
+  const edit1TextInputRef = useRef<any>(null); // Actual TextInput ref for selection operations
+  const [edit1Selection, setEdit1Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for web
 
   // Public state
   const [competitionMode, setPanel11CompetitionMode] = useState<boolean>(false);
@@ -2722,7 +2702,16 @@ export const useMainFormHandlers = () => {
   // TODO: Add RecvExchTypes state when types are defined
 
   // Form control state (Edit controls)
-  const [edit1Text, setEdit1Text] = useState('');
+  const [edit1Text, setEdit1TextState] = useState('');
+  
+  // setEdit1Text with validation (equivalent to Pascal Edit1KeyPress filtering)
+  // In Pascal, Edit1KeyPress sets Key := #0 to prevent invalid characters
+  // In React Native, we filter them in the setter
+  const setEdit1Text = useCallback((text: string) => {
+    // Valid characters: A-Z, a-z, 0-9, /, ? (matching Pascal CharInSet check)
+    const filtered = text.replace(/[^A-Za-z0-9/?]/g, '');
+    setEdit1TextState(filtered);
+  }, []);
   const [edit2Text, setEdit2Text] = useState('');
   const [edit3Text, setEdit3Text] = useState('');
   const [edit4Text, setEdit4Text] = useState('VE3NEA');
@@ -2741,6 +2730,10 @@ export const useMainFormHandlers = () => {
   const [checkBox5Checked, setCheckBox5Checked] = useState(false);
   const [checkBox6Checked, setCheckBox6Checked] = useState(false);
   
+  // QSO state (mirrors Pascal CallSent and NrSent)
+  const [callSent, setCallSent] = useState<boolean>(false);
+  const [nrSent, setNrSent] = useState<boolean>(false);
+  
   // ComboBox controls
   const [comboBox1Index, setComboBox1Index] = useState(0);
   const [comboBox2Index, setComboBox2Index] = useState(0);
@@ -2757,8 +2750,9 @@ export const useMainFormHandlers = () => {
 
   const FormCreate = useCallback((sender: any) => {
     console.log('FormCreate called');
-    // Store Edit1 focus function if provided (for ActiveControl functionality)
+    // Store Edit1 ref and focus function if provided (for ActiveControl functionality)
     if (sender?.edit1Ref) {
+      edit1TextInputRef.current = sender.edit1Ref.current; // Store actual TextInput ref for selection
       edit1Ref.current = () => {
         sender.edit1Ref.current?.focus();
       };
@@ -2834,10 +2828,23 @@ export const useMainFormHandlers = () => {
   // EVENT HANDLERS - Edit Control Events
   // ============================================================================
 
+  // procedure TMainForm.Edit1KeyPress(Sender: TObject; var Key: Char);
+  // begin
+  //   if not CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '/', '?', #8]) then
+  //     Key := #0;
+  // end;
   const Edit1KeyPress = useCallback((sender: any, key: string) => {
     console.log('Edit1KeyPress called with:', key);
-    // TODO: Implement from Pascal Edit1KeyPress
-    // - Validate characters (A-Z, a-z, 0-9, /, ?, backspace)
+    // Validate characters: A-Z, a-z, 0-9, /, ?, backspace (#8)
+    // In Pascal, invalid characters are set to #0 to prevent entry
+    // In React Native, we validate in onChangeText instead
+    const validChars = /^[A-Za-z0-9/?\b]$/;
+    if (!validChars.test(key) && key !== '\b') {
+      // Invalid character - in Pascal this would set Key := #0
+      // In React Native, we prevent this in onChangeText
+      return false;
+    }
+    return true;
   }, []);
 
   const Edit2KeyPress = useCallback((sender: any, key: string) => {
@@ -2860,11 +2867,64 @@ export const useMainFormHandlers = () => {
     // - Special processing for ARRL SS contest
   }, []);
 
+  // procedure TMainForm.Edit1Enter(Sender: TObject);
+  // var
+  //   P: integer;
+  // begin
+  //   P := Pos('?', Edit1.Text);
+  //   if P > 0 then
+  //   begin
+  //     Edit1.SelStart := P-1;
+  //     Edit1.SelLength := 1;
+  //   end;
+  // end;
   const Edit1Enter = useCallback((sender: any) => {
     console.log('Edit1Enter called');
-    // TODO: Implement from Pascal Edit1Enter
-    // - Select '?' character if present in Edit1.Text
-  }, []);
+    // Find position of '?' character in Edit1.Text
+    const p = edit1Text.indexOf('?');
+    if (p >= 0) {
+      // Select the '?' character (P-1 in Pascal is 0-based, so p is already 0-based)
+      // Use setTimeout to ensure TextInput is focused before setting selection
+      setTimeout(() => {
+        if (edit1TextInputRef.current) {
+          // Try setNativeProps first (for native platforms)
+          if (typeof edit1TextInputRef.current.setNativeProps === 'function') {
+            edit1TextInputRef.current.setNativeProps({
+              selection: { start: p, end: p + 1 }
+            });
+          } else {
+            // Fallback for web: use selection state prop
+            setEdit1Selection({ start: p, end: p + 1 });
+            // Also try DOM API as backup
+            const inputElement = edit1TextInputRef.current;
+            if (inputElement) {
+              // Try to access the underlying DOM element
+              let domElement: HTMLInputElement | null = null;
+              
+              // Check various possible ways to access the DOM element
+              if ((inputElement as any)._internalFiberInstanceHandleDEV) {
+                const stateNode = (inputElement as any)._internalFiberInstanceHandleDEV?.stateNode;
+                if (stateNode?._node) {
+                  domElement = stateNode._node;
+                } else if (stateNode?.input) {
+                  domElement = stateNode.input;
+                }
+              } else if ((inputElement as any)._nativeNode) {
+                domElement = (inputElement as any)._nativeNode;
+              } else if (inputElement instanceof HTMLInputElement) {
+                domElement = inputElement;
+              }
+              
+              if (domElement && typeof domElement.setSelectionRange === 'function') {
+                domElement.setSelectionRange(p, p + 1);
+                domElement.focus();
+              }
+            }
+          }
+        }
+      }, 10); // Slightly longer delay for web
+    }
+  }, [edit1Text]);
 
   const Edit2Enter = useCallback((sender: any) => {
     console.log('Edit2Enter called');
@@ -2879,12 +2939,30 @@ export const useMainFormHandlers = () => {
     // - Select entire field
   }, []);
 
+  // {
+  //   Called whenever callsign field (Edit1) changes. Any callsign edit will
+  //   invalidate the callsign already sent by clearing the CallSent value.
+  //   If the Callsign is empty, also clear the NrSent value.
+  // }
+  // procedure TMainForm.Edit1Change(Sender: TObject);
+  // begin
+  //     if Edit1.Text = '' then
+  //         NrSent := false;
+  //     if not Tst.Me.UpdateCallInMessage(Edit1.Text) then
+  //         CallSent := false;
+  // end;
   const Edit1Change = useCallback((sender: any) => {
     console.log('Edit1Change called');
-    // TODO: Implement from Pascal Edit1Change
-    // - Clear NrSent if Edit1.Text is empty
-    // - Update call in message, clear CallSent if needed
-  }, []);
+    // Clear NrSent if Edit1.Text is empty
+    if (edit1Text === '') {
+      setNrSent(false);
+    }
+    // TODO: Call Tst.Me.UpdateCallInMessage(edit1Text) - update call in message
+    // If UpdateCallInMessage returns false, clear CallSent
+    // For now, we'll clear CallSent when the text changes (simplified implementation)
+    // Full implementation requires UpdateCallInMessage method on Station class
+    setCallSent(false);
+  }, [edit1Text]);
 
   const Edit4Change = useCallback((sender: any) => {
     console.log('Edit4Change called');
@@ -3483,6 +3561,7 @@ export const useMainFormHandlers = () => {
   return {
     // State variables and their setters
     edit1Text, setEdit1Text,
+    edit1Selection, setEdit1Selection,
     edit2Text, setEdit2Text,
     edit3Text, setEdit3Text,
     edit4Text, setEdit4Text,

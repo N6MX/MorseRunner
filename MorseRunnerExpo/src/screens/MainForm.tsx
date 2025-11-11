@@ -1096,6 +1096,13 @@ const MainForm: React.FC = () => {
                 onChangeText={handlers.setEdit1Text}
                 onChange={(e) => handlers.Edit1Change(e.nativeEvent)}
                 onFocus={handlers.Edit1Enter}
+                selection={handlers.edit1Selection || undefined}
+                onSelectionChange={(e) => {
+                  // Clear selection state after it's been applied
+                  if (handlers.edit1Selection) {
+                    handlers.setEdit1Selection(null);
+                  }
+                }}
                 maxLength={12}
                 autoCapitalize="characters"
                 placeholder="Call"
