@@ -554,10 +554,11 @@ const MainForm: React.FC = () => {
   const buttonContainerRef = useRef<View>(null);
   const edit1Ref = useRef<TextInput>(null);
   const edit2Ref = useRef<TextInput>(null);
+  const edit3Ref = useRef<TextInput>(null);
 
   // Initialize form on mount
   useEffect(() => {
-    handlers.FormCreate({ edit1Ref, edit2Ref });
+    handlers.FormCreate({ edit1Ref, edit2Ref, edit3Ref });
     return () => {
       handlers.FormDestroy(null);
     };
@@ -1134,10 +1135,18 @@ const MainForm: React.FC = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.label3}>Nr.</Text>
               <TextInput
+                ref={edit3Ref}
                 style={styles.edit3}
                 value={handlers.edit3Text}
                 onChangeText={handlers.setEdit3Text}
                 onFocus={handlers.Edit3Enter}
+                selection={handlers.edit3Selection || undefined}
+                onSelectionChange={(e) => {
+                  // Clear selection state after it's been applied
+                  if (handlers.edit3Selection) {
+                    handlers.setEdit3Selection(null);
+                  }
+                }}
                 maxLength={4}
                 autoCapitalize="characters"
                 placeholder="Nr."

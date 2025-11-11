@@ -247,7 +247,6 @@
 //     procedure FormCreate(Sender: TObject);
 //     procedure AlSoundOut1BufAvailable(Sender: TObject);
 //     procedure FormDestroy(Sender: TObject);
-//     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
 //     procedure FormKeyPress(Sender: TObject; var Key: Char);
 //     procedure FormKeyDown(Sender: TObject; var Key: Word;
 //       Shift: TShiftState);
@@ -310,8 +309,6 @@
 //     procedure ExchangeEditExit(Sender: TObject);
 //     procedure Edit4Exit(Sender: TObject);
 //     procedure SpinEdit1Exit(Sender: TObject);
-//     procedure Edit3Enter(Sender: TObject);
-//     procedure Edit3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 
 //   private
 //     MustAdvance: boolean;       // Controls when Exchange fields advance
@@ -517,127 +514,6 @@
 //   if AlSoundOut1.Enabled then
 //     AlSoundOut1.PutData(Tst.GetAudio);
 // end;
-
-// {
-//   Called after each keystroke while editing the Exch2 field (Edit3).
-//   Allows special processing to occur for certain contests.
-// }
-// procedure TMainForm.Edit3KeyUp(Sender: TObject; var Key: Word;
-//   Shift: TShiftState);
-// begin
-//   // some contests have additional processing (e.g. ARRL SS)
-//   // (exclude function keys so we can use the debugger)
-//   var ExchSummary, ExchError: string;
-//   if (SimContest in [scArrlSS]) and ((Key < VK_F1) or (Key > VK_F12)) then
-//     begin
-//       if Tst.OnExchangeEdit(Edit1.Text, Edit2.Text, Edit3.Text,
-//         ExchSummary, ExchError) then
-//         begin
-//           Log.SBarUpdateSummary(ExchSummary);
-//           if not Log.SBarErrorMsg.IsEmpty and ExchError.IsEmpty then
-//             Log.DisplayError('', clDefault);
-//         end;
-//     end;
-// end;
-
-// procedure TMainForm.Edit3Enter(Sender: TObject);
-// begin
-//   Edit3.SelStart := 0;
-//   Edit3.SelLength := Edit3.GetTextLen;
-// end;
-
-// {
-//   Exchange field 2 key press. This procedure is called upon any keystroke
-//   in the Exchange 2 field. Depending on the exchange field type, it will
-//   map some keys into an equivalent numeric value. For example, the 'N'
-//   key is mapped to it's equivalent '9' value. this allows the user
-//   to type what they hear and this function will convert to the equivalent
-//   numeric value.
-// }
-// procedure TMainForm.Edit3KeyPress(Sender: TObject; var Key: Char);
-// begin
-//   case RecvExchTypes.Exch2 of
-//     etSerialNr, etItuZone, etAge:
-//       begin
-//         if RunMode <> rmHst then
-//           case Key of
-//             'a', 'A': Key := '1';
-//             'n', 'N': Key := '9';
-//             't', 'T': Key := '0';
-//           end;
-//         // valid Zone or NR field characters...
-//         if not CharInSet(Key, ['0'..'9', #8]) then
-//           Key := #0;
-//       end;
-//     etCqZone:
-//       begin
-//         if RunMode <> rmHst then
-//           case Key of
-//             'a', 'A': Key := '1';
-//             'n', 'N': Key := '9';
-//             'o', 'O': Key := '0';
-//             't', 'T': Key := '0';
-//           end;
-//         // valid CQ-Zone field characters...
-//         if not CharInSet(Key, ['0'..'9', #8]) then
-//           Key := #0;
-//       end;
-//     etGenericField:
-//       begin
-//         // log what the user types - assuming alpha numeric characters
-//         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', #8]) then
-//           Key := #0;
-//       end;
-//     etPower:
-//       begin
-//         { K6OK recommends not mapping these characters (PR #138)
-//         case Key of
-//           'a', 'A': Key := '1';
-//           'n', 'N': Key := '9';
-//           't', 'T': Key := '0';
-//         end;
-//         }
-//         // valid Power characters, including KW...
-//         if not CharInSet(Key, ['0'..'9', 'K', 'k', 'W', 'w', 'A', 'a',
-//                                'n', 'N', 'o', 'O', 't', 'T', #8]) then
-//           Key := #0;
-//       end;
-//     etArrlSection:
-//       begin
-//         // valid Section characters (e.g. OR or STX)
-//         if not CharInSet(Key, ['A'..'Z', 'a'..'z', #8]) then
-//           Key := #0;
-//       end;
-//     etStateProv:
-//       begin
-//         // valid State/Prov characters (e.g. OR or BC)
-//         if not CharInSet(Key, ['A'..'Z', 'a'..'z', #8]) then
-//           Key := #0;
-//       end;
-//     etNaQPExch2, etNaQpNonNaExch2:
-//       begin
-//         // valid NAQP Multiplier characters (e.g. OR, BC, or KP4)
-//         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', '/', #8]) then
-//           Key := #0;
-//       end;
-//     etJaPref, etJaCity:
-//       begin
-//         // valid Pref/City/Gun/Ku characters(numeric) and power characters (e.g. P|L|M|H)
-//         if not CharInSet(Key, ['0'..'9', 'L', 'M', 'H', 'P', 'l', 'm', 'h', 'p', #8]) then
-//           Key := #0;
-//       end;
-//     etSSCheckSection:
-//       begin
-//         // valid NR/Prec/Call/Check/Section characters
-//         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', '/', #32, #8]) then
-//           Key := #0;
-//       end
-//     else
-//       assert(false, Format('invalid exchange field 2 type: %s',
-//         [ToStr(RecvExchTypes.Exch2)]));
-//   end;
-// end;
-
 
 // procedure TMainForm.FormKeyPress(Sender: TObject; var Key: Char);
 // begin
@@ -2603,6 +2479,8 @@ export const useMainFormHandlers = () => {
   const [edit1Selection, setEdit1Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for web
   const edit2TextInputRef = useRef<any>(null); // Actual TextInput ref for Edit2 selection operations
   const [edit2Selection, setEdit2Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for Edit2 on web
+  const edit3TextInputRef = useRef<any>(null); // Actual TextInput ref for Edit3 selection operations
+  const [edit3Selection, setEdit3Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for Edit3 on web
 
   // Public state
   const [competitionMode, setPanel11CompetitionMode] = useState<boolean>(false);
@@ -2680,7 +2558,33 @@ export const useMainFormHandlers = () => {
     const filtered = mappedText.replace(/[^0-9]/g, '');
     setEdit2TextState(filtered);
   }, [runMode]);
-  const [edit3Text, setEdit3Text] = useState('');
+  const [edit3Text, setEdit3TextState] = useState('');
+  
+  // setEdit3Text with validation (equivalent to Pascal Edit3KeyPress filtering)
+  // In Pascal, Edit3KeyPress sets Key := #0 to prevent invalid characters
+  // In React Native, we filter them in the setter
+  const setEdit3Text = useCallback((text: string) => {
+    // TODO: Use RecvExchTypes.Exch2 when implemented
+    // For now, default to SerialNr mode (most common case)
+    // Map A/N/T to 1/9/0 for SerialNr/ItuZone/Age (unless HST mode)
+    let mappedText = text;
+    if (runMode !== 'HST Competition') {
+      mappedText = text.replace(/[aA]/g, '1').replace(/[nN]/g, '9').replace(/[tT]/g, '0');
+    }
+    // Filter invalid characters based on field type
+    // TODO: When RecvExchTypes is implemented, handle all cases:
+    //   - etSerialNr, etItuZone, etAge: only 0-9
+    //   - etCqZone: only 0-9 (with O->0 mapping)
+    //   - etGenericField: 0-9, A-Z, a-z
+    //   - etPower: 0-9, K, k, W, w, A, a, n, N, o, O, t, T
+    //   - etArrlSection, etStateProv: only A-Z, a-z
+    //   - etNaQPExch2, etNaQpNonNaExch2: 0-9, A-Z, a-z, /
+    //   - etJaPref, etJaCity: 0-9, L, M, H, P, l, m, h, p
+    //   - etSSCheckSection: 0-9, A-Z, a-z, /, space
+    // For now, default to SerialNr: only 0-9
+    const filtered = mappedText.replace(/[^0-9]/g, '');
+    setEdit3TextState(filtered);
+  }, [runMode]);
   const [edit4Text, setEdit4Text] = useState('VE3NEA');
   const [exchangeEditText, setExchangeEditText] = useState('3A ON');
   
@@ -2727,6 +2631,10 @@ export const useMainFormHandlers = () => {
     // Store Edit2 ref if provided (for selection operations)
     if (sender?.edit2Ref) {
       edit2TextInputRef.current = sender.edit2Ref.current;
+    }
+    // Store Edit3 ref if provided (for selection operations)
+    if (sender?.edit3Ref) {
+      edit3TextInputRef.current = sender.edit3Ref.current;
     }
     // TODO: Implement initialization logic from Pascal FormCreate
     // - Randomize
@@ -2881,17 +2789,142 @@ export const useMainFormHandlers = () => {
     return true;
   }, [runMode]);
 
+  // {
+  //   Exchange field 2 key press. This procedure is called upon any keystroke
+  //   in the Exchange 2 field. Depending on the exchange field type, it will
+  //   map some keys into an equivalent numeric value. For example, the 'N'
+  //   key is mapped to it's equivalent '9' value. this allows the user
+  //   to type what they hear and this function will convert to the equivalent
+  //   numeric value.
+  // }
+  // procedure TMainForm.Edit3KeyPress(Sender: TObject; var Key: Char);
+  // begin
+  //   case RecvExchTypes.Exch2 of
+  //     etSerialNr, etItuZone, etAge:
+  //       begin
+  //         if RunMode <> rmHst then
+  //           case Key of
+  //             'a', 'A': Key := '1';
+  //             'n', 'N': Key := '9';
+  //             't', 'T': Key := '0';
+  //           end;
+  //         // valid Zone or NR field characters...
+  //         if not CharInSet(Key, ['0'..'9', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etCqZone:
+  //       begin
+  //         if RunMode <> rmHst then
+  //           case Key of
+  //             'a', 'A': Key := '1';
+  //             'n', 'N': Key := '9';
+  //             'o', 'O': Key := '0';
+  //             't', 'T': Key := '0';
+  //           end;
+  //         // valid CQ-Zone field characters...
+  //         if not CharInSet(Key, ['0'..'9', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etGenericField:
+  //       begin
+  //         // log what the user types - assuming alpha numeric characters
+  //         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etPower:
+  //       begin
+  //         // valid Power characters, including KW...
+  //         if not CharInSet(Key, ['0'..'9', 'K', 'k', 'W', 'w', 'A', 'a',
+  //                                'n', 'N', 'o', 'O', 't', 'T', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etArrlSection:
+  //       begin
+  //         // valid Section characters (e.g. OR or STX)
+  //         if not CharInSet(Key, ['A'..'Z', 'a'..'z', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etStateProv:
+  //       begin
+  //         // valid State/Prov characters (e.g. OR or BC)
+  //         if not CharInSet(Key, ['A'..'Z', 'a'..'z', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etNaQPExch2, etNaQpNonNaExch2:
+  //       begin
+  //         // valid NAQP Multiplier characters (e.g. OR, BC, or KP4)
+  //         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', '/', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etJaPref, etJaCity:
+  //       begin
+  //         // valid Pref/City/Gun/Ku characters(numeric) and power characters (e.g. P|L|M|H)
+  //         if not CharInSet(Key, ['0'..'9', 'L', 'M', 'H', 'P', 'l', 'm', 'h', 'p', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etSSCheckSection:
+  //       begin
+  //         // valid NR/Prec/Call/Check/Section characters
+  //         if not CharInSet(Key, ['0'..'9', 'A'..'Z', 'a'..'z', '/', #32, #8]) then
+  //           Key := #0;
+  //       end
+  //     else
+  //       assert(false, Format('invalid exchange field 2 type: %s',
+  //         [ToStr(RecvExchTypes.Exch2)]));
+  //   end;
+  // end;
   const Edit3KeyPress = useCallback((sender: any, key: string) => {
     console.log('Edit3KeyPress called with:', key);
-    // TODO: Implement from Pascal Edit3KeyPress
-    // - Handle SerialNr, ItuZone, Age (map A/N/T to 1/9/0)
-    // - Handle CqZone, GenericField, Power, ArrlSection, etc. based on RecvExchTypes.Exch2
-  }, []);
+    // TODO: Use RecvExchTypes.Exch2 when implemented
+    // For now, default to SerialNr mode (most common case)
+    // When RecvExchTypes is implemented, use: case RecvExchTypes.Exch2 of ...
+    
+    // Default to SerialNr mode
+    let mappedKey = key;
+    
+    // SerialNr/ItuZone/Age mode: map A/N/T to 1/9/0 (unless HST mode)
+    if (runMode !== 'HST Competition') {
+      switch (key.toLowerCase()) {
+        case 'a': mappedKey = '1'; break;
+        case 'n': mappedKey = '9'; break;
+        case 't': mappedKey = '0'; break;
+      }
+    }
+    
+    // SerialNr mode: only allow 0-9 and backspace
+    // TODO: When RecvExchTypes is implemented, handle all cases (etCqZone, etGenericField, etPower, etc.)
+    const validSerialNrChars = /^[0-9\b]$/;
+    if (!validSerialNrChars.test(mappedKey) && mappedKey !== '\b') {
+      return false; // Invalid character
+    }
+    
+    return true;
+  }, [runMode]);
 
+  // procedure TMainForm.Edit3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+  // begin
+  //   // some contests have additional processing (e.g. ARRL SS)
+  //   // (exclude function keys so we can use the debugger)
+  //   var ExchSummary, ExchError: string;
+  //   if (SimContest in [scArrlSS]) and ((Key < VK_F1) or (Key > VK_F12)) then
+  //     begin
+  //       if Tst.OnExchangeEdit(Edit1.Text, Edit2.Text, Edit3.Text,
+  //         ExchSummary, ExchError) then
+  //         begin
+  //           Log.SBarUpdateSummary(ExchSummary);
+  //           if not Log.SBarErrorMsg.IsEmpty and ExchError.IsEmpty then
+  //             Log.DisplayError('', clDefault);
+  //         end;
+  //     end;
+  // end;
   const Edit3KeyUp = useCallback((sender: any, key: string, shift: any) => {
     console.log('Edit3KeyUp called with:', key, shift);
-    // TODO: Implement from Pascal Edit3KeyUp
-    // - Special processing for ARRL SS contest
+    // TODO: Implement special processing for ARRL SS contest
+    // - Check if SimContest = scArrlSS
+    // - Exclude function keys (F1-F12)
+    // - Call Tst.OnExchangeEdit(Edit1.Text, Edit2.Text, Edit3.Text, ExchSummary, ExchError)
+    // - Update status bar with ExchSummary
+    // - Display error if needed
   }, []);
 
   // procedure TMainForm.Edit1Enter(Sender: TObject);
@@ -3050,11 +3083,48 @@ export const useMainFormHandlers = () => {
     }
   }, [edit2Text]);
 
+  // procedure TMainForm.Edit3Enter(Sender: TObject);
+  // begin
+  //   Edit3.SelStart := 0;
+  //   Edit3.SelLength := Edit3.GetTextLen;
+  // end;
   const Edit3Enter = useCallback((sender: any) => {
     console.log('Edit3Enter called');
-    // TODO: Implement from Pascal Edit3Enter
-    // - Select entire field
-  }, []);
+    // Select entire field
+    setTimeout(() => {
+      if (edit3TextInputRef.current) {
+        if (typeof edit3TextInputRef.current.setNativeProps === 'function') {
+          edit3TextInputRef.current.setNativeProps({
+            selection: { start: 0, end: edit3Text.length }
+          });
+        } else {
+          // Fallback for web: use selection state prop
+          setEdit3Selection({ start: 0, end: edit3Text.length });
+          // Also try DOM API as backup
+          const inputElement = edit3TextInputRef.current;
+          if (inputElement) {
+            let domElement: HTMLInputElement | null = null;
+            if ((inputElement as any)._internalFiberInstanceHandleDEV) {
+              const stateNode = (inputElement as any)._internalFiberInstanceHandleDEV?.stateNode;
+              if (stateNode?._node) {
+                domElement = stateNode._node;
+              } else if (stateNode?.input) {
+                domElement = stateNode.input;
+              }
+            } else if ((inputElement as any)._nativeNode) {
+              domElement = (inputElement as any)._nativeNode;
+            } else if (inputElement instanceof HTMLInputElement) {
+              domElement = inputElement;
+            }
+            if (domElement && typeof domElement.setSelectionRange === 'function') {
+              domElement.setSelectionRange(0, edit3Text.length);
+              domElement.focus();
+            }
+          }
+        }
+      }
+    }, 10);
+  }, [edit3Text]);
 
   // {
   //   Called whenever callsign field (Edit1) changes. Any callsign edit will
@@ -3682,6 +3752,7 @@ export const useMainFormHandlers = () => {
     edit2Text, setEdit2Text,
     edit2Selection, setEdit2Selection,
     edit3Text, setEdit3Text,
+    edit3Selection, setEdit3Selection,
     edit4Text, setEdit4Text,
     exchangeEditText, setExchangeEditText,
     spinEdit1Value, setSpinEdit1Value,
