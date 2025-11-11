@@ -247,7 +247,6 @@
 //     procedure FormCreate(Sender: TObject);
 //     procedure AlSoundOut1BufAvailable(Sender: TObject);
 //     procedure FormDestroy(Sender: TObject);
-//     procedure Edit2KeyPress(Sender: TObject; var Key: Char);
 //     procedure Edit3KeyPress(Sender: TObject; var Key: Char);
 //     procedure FormKeyPress(Sender: TObject; var Key: Char);
 //     procedure FormKeyDown(Sender: TObject; var Key: Word;
@@ -276,7 +275,7 @@
 //     procedure Panel8MouseDown(Sender: TObject; Button: TMouseButton;
 //       Shift: TShiftState; X, Y: Integer);
 //     procedure Shape2MouseDown(Sender: TObject; Button: TMouseButton;
-//       Shift: TShiftState; X, Y: Integer);
+//       Shift: TShiftState; X, Y: Integer)
 //     procedure Edit2Enter(Sender: TObject);
 //     procedure VolumeSliderDblClick(Sender: TObject);
 //     procedure VolumeSlider1Change(Sender: TObject);
@@ -517,42 +516,6 @@
 // begin
 //   if AlSoundOut1.Enabled then
 //     AlSoundOut1.PutData(Tst.GetAudio);
-// end;
-
-// procedure TMainForm.Edit2KeyPress(Sender: TObject; var Key: Char);
-// begin
-//   case RecvExchTypes.Exch1 of
-//     etRST:
-//       begin
-//         if RunMode <> rmHst then
-//         begin
-//           // for RST field, map (A,E,N) to (1,5,9)
-//           case Key of
-//             'a', 'A': Key := '1';
-//             'e', 'E': Key := '5';
-//             'n', 'N': Key := '9';
-//           end;
-//         end;
-//         // valid RST characters...
-//         if not CharInSet(Key, ['0'..'9', #8]) then
-//           Key := #0;
-//       end;
-//     etOpName:
-//       begin
-//         // valid operator name characters
-//         if not CharInSet(Key, ['A'..'Z','a'..'z', #8]) then
-//           Key := #0;
-//       end;
-//     etFdClass:
-//       begin
-//         // valid Station Classification characters, [1-9][0-9]+[A-F]|DX
-//         if not CharInSet(Key, ['0'..'9','A'..'F','a'..'f','X','x',#8]) then
-//           Key := #0;
-//       end;
-//     else
-//       assert(false, Format('invalid exchange field 1 type: %s',
-//         [ToStr(RecvExchTypes.Exch1)]));
-//   end;
 // end;
 
 // {
@@ -1790,24 +1753,6 @@
 //     ShellExecute(GetDesktopWindow, 'open', PChar(FileName), '', '', SW_SHOWNORMAL);
 // end;
 
-// procedure TMainForm.Edit2Enter(Sender: TObject);
-// begin
-//   if Edit2IsRST then
-//     begin
-//       // for RST field, select middle digit
-//       if Length(Edit2.Text) = 3 then
-//         begin
-//           Edit2.SelStart := 1;
-//           Edit2.SelLength := 1;
-//         end;
-//     end
-//   else // otherwise select entire field
-//     begin
-//       Edit2.SelStart := 0;
-//       Edit2.SelLength := Edit2.GetTextLen;
-//     end;
-// end;
-
 
 
 // procedure TMainForm.EnableCtl(Ctl: TWinControl; AEnable: boolean);
@@ -2656,6 +2601,8 @@ export const useMainFormHandlers = () => {
   const edit1Ref = useRef<(() => void) | null>(null); // Function to focus Edit1 TextInput (equivalent to Pascal ActiveControl)
   const edit1TextInputRef = useRef<any>(null); // Actual TextInput ref for selection operations
   const [edit1Selection, setEdit1Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for web
+  const edit2TextInputRef = useRef<any>(null); // Actual TextInput ref for Edit2 selection operations
+  const [edit2Selection, setEdit2Selection] = useState<{ start: number; end: number } | null>(null); // Selection state for Edit2 on web
 
   // Public state
   const [competitionMode, setPanel11CompetitionMode] = useState<boolean>(false);
@@ -2712,7 +2659,27 @@ export const useMainFormHandlers = () => {
     const filtered = text.replace(/[^A-Za-z0-9/?]/g, '');
     setEdit1TextState(filtered);
   }, []);
-  const [edit2Text, setEdit2Text] = useState('');
+  const [edit2Text, setEdit2TextState] = useState('');
+  
+  // setEdit2Text with validation (equivalent to Pascal Edit2KeyPress filtering)
+  // In Pascal, Edit2KeyPress sets Key := #0 to prevent invalid characters
+  // In React Native, we filter them in the setter
+  const setEdit2Text = useCallback((text: string) => {
+    // Map A/E/N to 1/5/9 for RST mode (unless HST mode)
+    let mappedText = text;
+    if (runMode !== 'HST Competition') {
+      mappedText = text.replace(/[aA]/g, '1').replace(/[eE]/g, '5').replace(/[nN]/g, '9');
+    }
+    // Filter invalid characters based on field type
+    // TODO: Use RecvExchTypes.Exch1 when implemented
+    // For now, default to RST mode: only 0-9
+    // When RecvExchTypes is implemented:
+    //   - etRST: only 0-9
+    //   - etOpName: only A-Z, a-z
+    //   - etFdClass: only 0-9, A-F, a-f, X, x
+    const filtered = mappedText.replace(/[^0-9]/g, '');
+    setEdit2TextState(filtered);
+  }, [runMode]);
   const [edit3Text, setEdit3Text] = useState('');
   const [edit4Text, setEdit4Text] = useState('VE3NEA');
   const [exchangeEditText, setExchangeEditText] = useState('3A ON');
@@ -2756,6 +2723,10 @@ export const useMainFormHandlers = () => {
       edit1Ref.current = () => {
         sender.edit1Ref.current?.focus();
       };
+    }
+    // Store Edit2 ref if provided (for selection operations)
+    if (sender?.edit2Ref) {
+      edit2TextInputRef.current = sender.edit2Ref.current;
     }
     // TODO: Implement initialization logic from Pascal FormCreate
     // - Randomize
@@ -2847,12 +2818,68 @@ export const useMainFormHandlers = () => {
     return true;
   }, []);
 
+  // procedure TMainForm.Edit2KeyPress(Sender: TObject; var Key: Char);
+  // begin
+  //   case RecvExchTypes.Exch1 of
+  //     etRST:
+  //       begin
+  //         if RunMode <> rmHst then
+  //         begin
+  //           // for RST field, map (A,E,N) to (1,5,9)
+  //           case Key of
+  //             'a', 'A': Key := '1';
+  //             'e', 'E': Key := '5';
+  //             'n', 'N': Key := '9';
+  //           end;
+  //         end;
+  //         // valid RST characters...
+  //         if not CharInSet(Key, ['0'..'9', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etOpName:
+  //       begin
+  //         // valid operator name characters
+  //         if not CharInSet(Key, ['A'..'Z','a'..'z', #8]) then
+  //           Key := #0;
+  //       end;
+  //     etFdClass:
+  //       begin
+  //         // valid Station Classification characters, [1-9][0-9]+[A-F]|DX
+  //         if not CharInSet(Key, ['0'..'9','A'..'F','a'..'f','X','x',#8]) then
+  //           Key := #0;
+  //       end;
+  //     else
+  //       assert(false, Format('invalid exchange field 1 type: %s',
+  //         [ToStr(RecvExchTypes.Exch1)]));
+  //   end;
+  // end;
   const Edit2KeyPress = useCallback((sender: any, key: string) => {
     console.log('Edit2KeyPress called with:', key);
-    // TODO: Implement from Pascal Edit2KeyPress
-    // - Handle RST field (map A/E/N to 1/5/9)
-    // - Handle OpName, FdClass, etc. based on RecvExchTypes.Exch1
-  }, []);
+    // TODO: Use RecvExchTypes.Exch1 when implemented
+    // For now, default to RST mode (most common case)
+    // When RecvExchTypes is implemented, use: case RecvExchTypes.Exch1 of etRST, etOpName, etFdClass
+    
+    // Default to RST mode
+    let mappedKey = key;
+    
+    // RST mode: map A/E/N to 1/5/9 (unless HST mode)
+    if (runMode !== 'HST Competition') {
+      switch (key.toLowerCase()) {
+        case 'a': mappedKey = '1'; break;
+        case 'e': mappedKey = '5'; break;
+        case 'n': mappedKey = '9'; break;
+      }
+    }
+    
+    // RST mode: only allow 0-9 and backspace
+    // TODO: When RecvExchTypes is implemented, handle etOpName and etFdClass cases
+    const validRSTChars = /^[0-9\b]$/;
+    if (!validRSTChars.test(mappedKey) && mappedKey !== '\b') {
+      return false; // Invalid character
+    }
+    
+    return true;
+  }, [runMode]);
 
   const Edit3KeyPress = useCallback((sender: any, key: string) => {
     console.log('Edit3KeyPress called with:', key);
@@ -2926,12 +2953,102 @@ export const useMainFormHandlers = () => {
     }
   }, [edit1Text]);
 
+  // procedure TMainForm.Edit2Enter(Sender: TObject);
+  // begin
+  //   if Edit2IsRST then
+  //     begin
+  //       // for RST field, select middle digit
+  //       if Length(Edit2.Text) = 3 then
+  //         begin
+  //           Edit2.SelStart := 1;
+  //           Edit2.SelLength := 1;
+  //         end;
+  //     end
+  //   else // otherwise select entire field
+  //     begin
+  //       Edit2.SelStart := 0;
+  //       Edit2.SelLength := Edit2.GetTextLen;
+  //     end;
+  // end;
   const Edit2Enter = useCallback((sender: any) => {
     console.log('Edit2Enter called');
-    // TODO: Implement from Pascal Edit2Enter
-    // - For RST field: select middle digit
-    // - Otherwise: select entire field
-  }, []);
+    // TODO: Use Edit2IsRST (which checks RecvExchTypes.Exch1 = etRST) when RecvExchTypes is implemented
+    // For now, default to RST mode behavior
+    const isRST = true; // TODO: Replace with Edit2IsRST check when RecvExchTypes is implemented
+    
+    if (isRST) {
+      // For RST field: select middle digit if length is 3
+      if (edit2Text.length === 3) {
+        setTimeout(() => {
+          if (edit2TextInputRef.current) {
+            // Try setNativeProps first (for native platforms)
+            if (typeof edit2TextInputRef.current.setNativeProps === 'function') {
+              edit2TextInputRef.current.setNativeProps({
+                selection: { start: 1, end: 2 }
+              });
+            } else {
+              // Fallback for web: use selection state prop
+              setEdit2Selection({ start: 1, end: 2 });
+              // Also try DOM API as backup
+              const inputElement = edit2TextInputRef.current;
+              if (inputElement) {
+                let domElement: HTMLInputElement | null = null;
+                if ((inputElement as any)._internalFiberInstanceHandleDEV) {
+                  const stateNode = (inputElement as any)._internalFiberInstanceHandleDEV?.stateNode;
+                  if (stateNode?._node) {
+                    domElement = stateNode._node;
+                  } else if (stateNode?.input) {
+                    domElement = stateNode.input;
+                  }
+                } else if ((inputElement as any)._nativeNode) {
+                  domElement = (inputElement as any)._nativeNode;
+                } else if (inputElement instanceof HTMLInputElement) {
+                  domElement = inputElement;
+                }
+                if (domElement && typeof domElement.setSelectionRange === 'function') {
+                  domElement.setSelectionRange(1, 2);
+                  domElement.focus();
+                }
+              }
+            }
+          }
+        }, 10);
+      }
+    } else {
+      // Otherwise: select entire field
+      setTimeout(() => {
+        if (edit2TextInputRef.current) {
+          if (typeof edit2TextInputRef.current.setNativeProps === 'function') {
+            edit2TextInputRef.current.setNativeProps({
+              selection: { start: 0, end: edit2Text.length }
+            });
+          } else {
+            setEdit2Selection({ start: 0, end: edit2Text.length });
+            const inputElement = edit2TextInputRef.current;
+            if (inputElement) {
+              let domElement: HTMLInputElement | null = null;
+              if ((inputElement as any)._internalFiberInstanceHandleDEV) {
+                const stateNode = (inputElement as any)._internalFiberInstanceHandleDEV?.stateNode;
+                if (stateNode?._node) {
+                  domElement = stateNode._node;
+                } else if (stateNode?.input) {
+                  domElement = stateNode.input;
+                }
+              } else if ((inputElement as any)._nativeNode) {
+                domElement = (inputElement as any)._nativeNode;
+              } else if (inputElement instanceof HTMLInputElement) {
+                domElement = inputElement;
+              }
+              if (domElement && typeof domElement.setSelectionRange === 'function') {
+                domElement.setSelectionRange(0, edit2Text.length);
+                domElement.focus();
+              }
+            }
+          }
+        }
+      }, 10);
+    }
+  }, [edit2Text]);
 
   const Edit3Enter = useCallback((sender: any) => {
     console.log('Edit3Enter called');
@@ -3563,6 +3680,7 @@ export const useMainFormHandlers = () => {
     edit1Text, setEdit1Text,
     edit1Selection, setEdit1Selection,
     edit2Text, setEdit2Text,
+    edit2Selection, setEdit2Selection,
     edit3Text, setEdit3Text,
     edit4Text, setEdit4Text,
     exchangeEditText, setExchangeEditText,

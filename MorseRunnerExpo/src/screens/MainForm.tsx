@@ -553,10 +553,11 @@ const MainForm: React.FC = () => {
   const [dropdownButtonLayout, setDropdownButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const buttonContainerRef = useRef<View>(null);
   const edit1Ref = useRef<TextInput>(null);
+  const edit2Ref = useRef<TextInput>(null);
 
   // Initialize form on mount
   useEffect(() => {
-    handlers.FormCreate({ edit1Ref });
+    handlers.FormCreate({ edit1Ref, edit2Ref });
     return () => {
       handlers.FormDestroy(null);
     };
@@ -1112,10 +1113,18 @@ const MainForm: React.FC = () => {
             <View style={styles.inputGroup}>
               <Text style={styles.label2}>RST</Text>
               <TextInput
+                ref={edit2Ref}
                 style={styles.edit2}
                 value={handlers.edit2Text}
                 onChangeText={handlers.setEdit2Text}
                 onFocus={handlers.Edit2Enter}
+                selection={handlers.edit2Selection || undefined}
+                onSelectionChange={(e) => {
+                  // Clear selection state after it's been applied
+                  if (handlers.edit2Selection) {
+                    handlers.setEdit2Selection(null);
+                  }
+                }}
                 maxLength={10}
                 autoCapitalize="characters"
                 placeholder="RST"
