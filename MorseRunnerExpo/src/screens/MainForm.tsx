@@ -994,7 +994,7 @@ const MainForm: React.FC = () => {
                           styles.runDropdownItem,
                           handlers.currentRunMode === 'Pile-Up' && styles.runDropdownItemSelected,
                         ]}
-                        onPress={() => handlers.handleRunModeSelect('Pile-Up')}
+                        onPress={() => handlers.RunBtnClick(null, false, 'Pile-Up')}
                       >
                         <Text style={[
                           styles.runDropdownItemText,
@@ -1003,19 +1003,19 @@ const MainForm: React.FC = () => {
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.runDropdownItem}
-                        onPress={() => handlers.handleRunModeSelect('Single Calls')}
+                        onPress={() => handlers.RunBtnClick(null, false, 'Single Calls')}
                       >
                         <Text style={styles.runDropdownItemText}>Single Calls</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.runDropdownItem}
-                        onPress={() => handlers.handleRunModeSelect('WPX Competition')}
+                        onPress={() => handlers.RunBtnClick(null, false, 'WPX Competition')}
                       >
                         <Text style={styles.runDropdownItemText}>WPX Competition</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.runDropdownItem}
-                        onPress={() => handlers.handleRunModeSelect('HST Competition')}
+                        onPress={() => handlers.RunBtnClick(null, false, 'HST Competition')}
                       >
                         <Text style={styles.runDropdownItemText}>HST Competition</Text>
                       </TouchableOpacity>

@@ -3006,15 +3006,6 @@ export const useMainFormHandlers = () => {
     SendMsg(msg);
   }, [SendMsg]);
 
-  const handleRunModeSelect = useCallback((mode: string) => {
-    console.log('handleRunModeSelect called with mode:', mode);
-    setCurrentRunMode(mode);
-    setRunDropdownVisible(false);
-    // TODO: Implement Run(mode) - actual run logic
-    setRunButtonDown(true);
-    setRunButtonCaption('Stop');
-  }, []);
-
   // procedure TMainForm.RunBtnClick(Sender: TObject);
   // begin
   //   if RunMode = rmStop then
@@ -3022,16 +3013,21 @@ export const useMainFormHandlers = () => {
   //   else
   //     Tst.FStopPressed := true;
   // end;
-  const RunBtnClick = useCallback((sender: any, isDropdownArea?: boolean) => {
-    console.log('RunBtnClick called', isDropdownArea ? '(dropdown area)' : '');
+  const RunBtnClick = useCallback((sender: any, isDropdownArea?: boolean, mode?: string) => {
+    console.log('RunBtnClick called', isDropdownArea ? '(dropdown area)' : '', mode ? `with mode: ${mode}` : '');
     // Toggle dropdown if stopped, or stop if running
     if (!runButtonDown) {
       if (isDropdownArea) {
         // Toggle dropdown
         setRunDropdownVisible(!runDropdownVisible);
       } else {
-        // Run with current mode
-        handleRunModeSelect(currentRunMode);
+        // Run with specified mode or current mode
+        const runMode = mode || currentRunMode;
+        setCurrentRunMode(runMode);
+        setRunDropdownVisible(false);
+        // TODO: Implement Run(mode) - actual run logic
+        setRunButtonDown(true);
+        setRunButtonCaption('Stop');
       }
     } else {
       // When running, clicking stops
@@ -3039,7 +3035,7 @@ export const useMainFormHandlers = () => {
       setRunButtonCaption('   Run   ');
       setRunDropdownVisible(false);
     }
-  }, [runButtonDown, runDropdownVisible, currentRunMode, handleRunModeSelect]);
+  }, [runButtonDown, runDropdownVisible, currentRunMode]);
 
   // procedure TMainForm.SetQsk(Value: boolean);
   // begin
@@ -3267,8 +3263,13 @@ export const useMainFormHandlers = () => {
       4: 'HST Competition',
     };
     const mode = modeMap[sender?.tag] || 'Pile-Up';
-    handleRunModeSelect(mode);
-  }, [handleRunModeSelect]);
+    // Inline the run logic (equivalent to handleRunModeSelect)
+    setCurrentRunMode(mode);
+    setRunDropdownVisible(false);
+    // TODO: Implement Run(mode) - actual run logic
+    setRunButtonDown(true);
+    setRunButtonCaption('Stop');
+  }, []);
 
   // procedure TMainForm.StopMNUClick(Sender: TObject);
   // begin
@@ -3527,7 +3528,6 @@ export const useMainFormHandlers = () => {
     runButtonCaption, setRunButtonCaption,
     runDropdownVisible, setRunDropdownVisible,
     currentRunMode, setCurrentRunMode,
-    handleRunModeSelect,
     
     // Form event handlers
     FormCreate,
