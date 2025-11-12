@@ -551,6 +551,7 @@ const { width, height } = Dimensions.get('window');
 const MainForm: React.FC = () => {
   const handlers = useMainFormHandlers();
   const [dropdownButtonLayout, setDropdownButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [shape2Layout, setShape2Layout] = useState<{ left: number; width: number } | null>(null);
   const buttonContainerRef = useRef<View>(null);
   const edit1Ref = useRef<TextInput>(null);
   const edit2Ref = useRef<TextInput>(null);
@@ -1251,7 +1252,10 @@ const MainForm: React.FC = () => {
             style={styles.panel8}
             onPressIn={(e) => {
                 const { locationX } = e.nativeEvent;
-                handlers.Panel8MouseDown(null, null, null, locationX, 0);
+                // Pass Shape2's measured layout (like Pascal's Shape2.Left and Shape2.Width properties)
+                if (shape2Layout) {
+                    handlers.Panel8MouseDown(null, null, null, locationX, 0, shape2Layout.left, shape2Layout.width);
+                }
             }}
             activeOpacity={1}
             >
@@ -1265,6 +1269,12 @@ const MainForm: React.FC = () => {
                     transform: [{ translateX: handlers.ritValue / 9 - 16 }], // RIT offset minus half width
                 }
                 ]}
+                onLayout={(e) => {
+                    // Measure Shape2's position relative to Panel8 (like Pascal's Shape2.Left property)
+                    // onLayout provides x, y, width, height relative to parent (Panel8)
+                    const { x, width } = e.nativeEvent.layout;
+                    setShape2Layout({ left: x, width });
+                }}
                 onPressIn={() => handlers.Shape2MouseDown(null, null, null, 0, 0)}
                 activeOpacity={1}
             />

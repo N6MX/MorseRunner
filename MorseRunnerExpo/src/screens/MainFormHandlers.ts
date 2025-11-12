@@ -271,10 +271,6 @@
 //     procedure ViewScoreTable1Click(Sender: TObject);
 //     procedure FormKeyUp(Sender: TObject; var Key: Word;
 //       Shift: TShiftState);
-//     procedure Panel8MouseDown(Sender: TObject; Button: TMouseButton;
-//       Shift: TShiftState; X, Y: Integer);
-//     procedure Shape2MouseDown(Sender: TObject; Button: TMouseButton;
-//       Shift: TShiftState; X, Y: Integer)
 //     procedure Edit2Enter(Sender: TObject);
 //     procedure VolumeSliderDblClick(Sender: TObject);
 //     procedure VolumeSlider1Change(Sender: TObject);
@@ -328,8 +324,6 @@
 //     procedure EnableCtl(Ctl: TWinControl; AEnable: boolean);
 //     procedure WmTbDown(var Msg: TMessage); message WM_TBDOWN;
 //     procedure SetToolbuttonDown(Toolbutton: TToolbutton; ADown: boolean);
-//     procedure IncRit(dF: integer);
-//     procedure UpdateRitIndicator;
 //     procedure DecSpeed;
 //     procedure IncSpeed;
 //   public
@@ -1959,25 +1953,6 @@
 //   RichEdit1.Font.Name:= 'Consolasf';
 // end;
 
-
-// procedure TMainForm.Panel8MouseDown(Sender: TObject; Button: TMouseButton;
-//   Shift: TShiftState; X, Y: Integer);
-// begin
-//   if X < Shape2.Left then
-//     IncRit(-1)
-//   else
-//     if X > (Shape2.Left + Shape2.Width) then
-//       IncRit(1);
-// end;
-
-
-// procedure TMainForm.Shape2MouseDown(Sender: TObject; Button: TMouseButton;
-//   Shift: TShiftState; X, Y: Integer);
-// begin
-//   IncRit(0);
-// end;
-
-
 // procedure TMainForm.mnuShowCallsignInfoClick(Sender: TObject);
 // begin
 //     with Sender as TMenuItem do begin
@@ -1995,36 +1970,7 @@
 // end;
 
 
-// procedure TMainForm.IncRit(dF: integer);
-// var
-//   RitStepIncr : integer;
-// begin
-//   RitStepIncr := IfThen(RunMode = rmHST, 50, Ini.RitStepIncr);
 
-//   // A negative RitStepInc will change direction of arrow/wheel movement
-//   if RitStepIncr < 0 then begin
-//     dF := -dF;
-//     RitStepIncr := -RitStepIncr;
-//   end;
-
-//   case dF of
-//    -2: if Ini.Rit > -500 then Inc(RitLocal, -5);
-//    -1: if Ini.Rit > -500 then Inc(RitLocal, -RitStepIncr);
-//     0: RitLocal := 0;
-//     1: if Ini.Rit < 500 then Inc(RitLocal, RitStepIncr);
-//     2: if Ini.Rit < 500 then Inc(RitLocal, 5);
-//   end;
-
-//   Ini.Rit := Min(500, Max(-500, RitLocal));
-//   UpdateRitIndicator;
-// end;
-
-
-// procedure TMainForm.UpdateRitIndicator;
-// begin
-//   Shape2.Width := Ini.Bandwidth div 9;
-//   Shape2.Left := ((Panel8.Width - Shape2.Width) div 2) + (Ini.Rit div 9);
-// end;
 
 
 // {
@@ -3452,21 +3398,144 @@ export const useMainFormHandlers = () => {
   }, []);
 
   // ============================================================================
+  // PRIVATE METHODS - RIT Functions
+  // ============================================================================
+
+  // procedure TMainForm.UpdateRitIndicator;
+  // begin
+  //   Shape2.Width := Ini.Bandwidth div 9;
+  //   Shape2.Left := ((Panel8.Width - Shape2.Width) div 2) + (Ini.Rit div 9);
+  // end;
+  const UpdateRitIndicator = useCallback(() => {
+    // Update the RIT indicator position based on current RIT value
+    // The position is calculated in MainForm.tsx based on ritValue state
+    // This function is kept for consistency with Pascal code structure
+    // The actual positioning is handled by the ritValue state in the UI
+  }, []);
+
+  // procedure TMainForm.IncRit(dF: integer);
+  // var
+  //   RitStepIncr : integer;
+  // begin
+  //   RitStepIncr := IfThen(RunMode = rmHST, 50, Ini.RitStepIncr);
+
+  //   // A negative RitStepInc will change direction of arrow/wheel movement
+  //   if RitStepIncr < 0 then begin
+  //     dF := -dF;
+  //     RitStepIncr := -RitStepIncr;
+  //   end;
+
+  //   case dF of
+  //    -2: if Ini.Rit > -500 then Inc(RitLocal, -5);
+  //    -1: if Ini.Rit > -500 then Inc(RitLocal, -RitStepIncr);
+  //     0: RitLocal := 0;
+  //     1: if Ini.Rit < 500 then Inc(RitLocal, RitStepIncr);
+  //     2: if Ini.Rit < 500 then Inc(RitLocal, 5);
+  //   end;
+
+  //   Ini.Rit := Min(500, Max(-500, RitLocal));
+  //   UpdateRitIndicator;
+  // end;
+  const IncRit = useCallback((dF: number) => {
+    const settings = Ini.Ini.getSettings();
+    const isHST = runMode === 'H S T' || runMode === 'HST Competition';
+    const ritStepIncr = isHST ? 50 : ((settings as any).ritStepIncr || 10); // Default to 10 if not set
+
+    let adjustedDF = dF;
+    let adjustedRitStepIncr = ritStepIncr;
+
+    // A negative RitStepInc will change direction of arrow/wheel movement
+    if (ritStepIncr < 0) {
+      adjustedDF = -adjustedDF;
+      adjustedRitStepIncr = -adjustedRitStepIncr;
+    }
+
+    // Sync ritLocalRef with current ritValue (like Pascal's RitLocal tracking Ini.Rit)
+    // Pascal checks Ini.Rit (current value) before incrementing, not RitLocal
+    const currentRit = ritValue; // This is like Ini.Rit in Pascal
+    if (ritLocalRef.current !== currentRit) {
+      ritLocalRef.current = currentRit;
+    }
+
+    // Update ritLocal based on dF value
+    // Note: Pascal checks Ini.Rit (not RitLocal) before incrementing
+    switch (adjustedDF) {
+      case -2:
+        if (currentRit > -500) {
+          ritLocalRef.current = ritLocalRef.current - 5;
+        }
+        break;
+      case -1:
+        if (currentRit > -500) {
+          ritLocalRef.current = ritLocalRef.current - adjustedRitStepIncr;
+        }
+        break;
+      case 0:
+        ritLocalRef.current = 0;
+        break;
+      case 1:
+        if (currentRit < 500) {
+          ritLocalRef.current = ritLocalRef.current + adjustedRitStepIncr;
+        }
+        break;
+      case 2:
+        if (currentRit < 500) {
+          ritLocalRef.current = ritLocalRef.current + 5;
+        }
+        break;
+    }
+
+    // Clamp RIT value between -500 and 500
+    // Pascal: Ini.Rit := Min(500, Max(-500, RitLocal));
+    const newRit = Math.min(500, Math.max(-500, ritLocalRef.current));
+    setRitValue(newRit);
+    
+    // Update RIT in settings if needed (assuming we want to persist it)
+    // Ini.updateSetting('rit', newRit); // Uncomment if RIT should be persisted
+
+    UpdateRitIndicator();
+  }, [runMode, ritValue]); // Need ritValue to check boundaries like Pascal checks Ini.Rit
+
+  // ============================================================================
   // EVENT HANDLERS - Panel/Shape Events
   // ============================================================================
 
-  const Panel8MouseDown = useCallback((sender: any, button: any, shift: any, x: number, y: number) => {
-    console.log('Panel8MouseDown called');
-    // TODO: Implement from Pascal Panel8MouseDown
-    // - If X < Shape2.Left: IncRit(-1)
-    // - If X > Shape2.Left + Shape2.Width: IncRit(1)
-  }, []);
+  // procedure TMainForm.Panel8MouseDown(Sender: TObject; Button: TMouseButton;
+  //   Shift: TShiftState; X, Y: Integer);
+  // begin
+  //   if X < Shape2.Left then
+  //     IncRit(-1)
+  //   else
+  //     if X > (Shape2.Left + Shape2.Width) then
+  //       IncRit(1);
+  // end;
+  const Panel8MouseDown = useCallback((sender: any, button: any, shift: any, x: number, y: number, shape2Left: number, shape2Width: number) => {
+    console.log('Panel8MouseDown called', { x, shape2Left, shape2Width });
+    
+    // From Pascal: if X < Shape2.Left then IncRit(-1), else if X > Shape2.Left + Shape2.Width then IncRit(1)
+    // In Pascal, Shape2.Left and Shape2.Width are component properties that are directly accessible
+    // In React Native, we pass these values from the component's measured layout
+    if (shape2Left === undefined || shape2Width === undefined) {
+      console.warn('Panel8MouseDown: Shape2 layout not available, skipping RIT adjustment');
+      return;
+    }
+    
+    if (x < shape2Left) {
+      IncRit(-1);
+    } else if (x > (shape2Left + shape2Width)) {
+      IncRit(1);
+    }
+  }, [IncRit]);
 
+  // procedure TMainForm.Shape2MouseDown(Sender: TObject; Button: TMouseButton;
+  //   Shift: TShiftState; X, Y: Integer);
+  // begin
+  //   IncRit(0);
+  // end;
   const Shape2MouseDown = useCallback((sender: any, button: any, shift: any, x: number, y: number) => {
     console.log('Shape2MouseDown called');
-    // TODO: Implement from Pascal Shape2MouseDown
-    // - IncRit(0)
-  }, []);
+    IncRit(0);
+  }, [IncRit]);
 
   // ============================================================================
   // EVENT HANDLERS - ListView Events
@@ -3740,8 +3809,6 @@ export const useMainFormHandlers = () => {
   // - ProcessEnter()
   // - EnableCtl(Ctl: TWinControl; AEnable: boolean)
   // - SetToolbuttonDown(Toolbutton: TToolbutton; ADown: boolean)
-  // - IncRit(dF: integer)
-  // - UpdateRitIndicator()
   // - DecSpeed()
   // - IncSpeed()
 
