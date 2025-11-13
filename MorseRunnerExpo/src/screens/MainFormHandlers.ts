@@ -261,7 +261,6 @@
 //     procedure FormClose(Sender: TObject; var Action: TCloseAction);
 //     procedure SpinEdit1Change(Sender: TObject);
 //     procedure SpinEdit2Change(Sender: TObject);
-//     procedure SpinEdit3Change(Sender: TObject);
 //     procedure PaintBox1Paint(Sender: TObject);
 //     procedure Exit1Click(Sender: TObject);
 //     procedure FirstTime1Click(Sender: TObject);
@@ -1532,11 +1531,6 @@
 // begin
 //   Ini.Duration := SpinEdit2.Value;
 //   Histo.ReCalc(Ini.Duration);
-// end;
-
-// procedure TMainForm.SpinEdit3Change(Sender: TObject);
-// begin
-//   Ini.Activity := SpinEdit3.Value;
 // end;
 
 // procedure TMainForm.PaintBox1Paint(Sender: TObject);
@@ -3334,11 +3328,16 @@ export const useMainFormHandlers = () => {
     // - Histo.ReCalc(Ini.Duration)
   }, []);
 
-  const SpinEdit3Change = useCallback((sender: any) => {
+  // procedure TMainForm.SpinEdit3Change(Sender: TObject);
+  // begin
+  //   Ini.Activity := SpinEdit3.Value;
+  // end;
+  const SpinEdit3Change = useCallback(async (sender: any) => {
     console.log('SpinEdit3Change called');
-    // TODO: Implement from Pascal SpinEdit3Change
+    // Implement from Pascal SpinEdit3Change
     // - Set Ini.Activity = SpinEdit3.Value
-  }, []);
+    await Ini.Ini.updateSetting('activity', spinEdit3Value);
+  }, [spinEdit3Value]);
 
   // ============================================================================
   // EVENT HANDLERS - ComboBox Events
