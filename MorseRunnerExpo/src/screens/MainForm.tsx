@@ -1016,8 +1016,12 @@ const MainForm: React.FC = () => {
                 onPress={() => handlers.RunBtnClick(null, false)}
               >
                 <View style={styles.toolButton1Content}>
-                  {/* Green play icon */}
-                  <View style={styles.playIcon} />
+                  {/* Green play icon when stopped, red square when running */}
+                  {handlers.runButtonDown ? (
+                    <View style={styles.stopIcon} />
+                  ) : (
+                    <View style={styles.playIcon} />
+                  )}
                   <Text style={styles.toolButton1Text}>{handlers.runButtonCaption}</Text>
                 </View>
               </TouchableOpacity>
@@ -2319,6 +2323,13 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
     borderLeftColor: '#00FF00', // Green play icon
     marginRight: 2,
+  },
+  stopIcon: {
+    width: 10,
+    height: 10,
+    backgroundColor: '#FF0000', // Red square
+    marginRight: 2,
+    borderRadius: 1, // Slightly rounded corners for a more polished look
   },
   toolButton1Text: {
     fontSize: 12,
