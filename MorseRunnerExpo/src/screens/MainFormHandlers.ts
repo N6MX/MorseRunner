@@ -3083,17 +3083,38 @@ export const useMainFormHandlers = () => {
     }
   }, [edit4Text, SetMyCall]);
 
+  // procedure TMainForm.ExchangeEditChange(Sender: TObject);
+  // begin
+  //   // exchange edit callsign edit has occurred; allows SetMyCall to be called.
+  //   UserExchangeDirty := True;
+  // end;
   const ExchangeEditChange = useCallback((sender: any) => {
-    console.log('ExchangeEditChange called');
-    // TODO: Implement from Pascal ExchangeEditChange
-    // - Set UserExchangeDirty = true
+    // exchange edit has occurred; mark as dirty to allow SetMyExchange to be called on exit
+    userExchangeDirtyRef.current = true;
+    console.log('ExchangeEditChange: Marked as dirty');
   }, []);
 
+  // procedure TMainForm.ExchangeEditExit(Sender: TObject);
+  // begin
+  //   if UserExchangeDirty then
+  //     SetMyExchange(Trim(ExchangeEdit.Text));
+  // end;
   const ExchangeEditExit = useCallback((sender: any) => {
-    console.log('ExchangeEditExit called');
-    // TODO: Implement from Pascal ExchangeEditExit
-    // - Call SetMyExchange if UserExchangeDirty
-  }, []);
+    const isDirty = userExchangeDirtyRef.current;
+    const trimmedExchange = exchangeEditText.trim();
+    console.log(`ExchangeEditExit: dirty=${isDirty}, exchange="${trimmedExchange}"`);
+    
+    // Call SetMyExchange if the exchange has been edited
+    if (isDirty) {
+      console.log('ExchangeEditExit: Calling SetMyExchange');
+      // TODO: Implement SetMyExchange when it's available
+      // SetMyExchange(trimmedExchange);
+      // For now, just clear the dirty flag
+      userExchangeDirtyRef.current = false;
+    } else {
+      console.log('ExchangeEditExit: No changes to apply');
+    }
+  }, [exchangeEditText]);
 
   // ============================================================================
   // EVENT HANDLERS - Button Events

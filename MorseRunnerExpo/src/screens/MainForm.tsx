@@ -733,8 +733,10 @@ const MainForm: React.FC = () => {
             <TextInput
               style={styles.exchangeEdit}
               value={handlers.exchangeEditText}
-              onChangeText={handlers.setExchangeEditText}
-              onChange={handlers.ExchangeEditChange}
+              onChangeText={(text) => {
+                handlers.setExchangeEditText(text);
+                handlers.ExchangeEditChange(null);
+              }}
               onBlur={handlers.ExchangeEditExit}
               maxLength={20}
               autoCapitalize="characters"
