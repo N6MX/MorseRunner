@@ -2332,6 +2332,7 @@ export const useMainFormHandlers = () => {
   const cwSpeedDirtyRef = useRef<boolean>(false);
   const spinEdit1FocusedRef = useRef<boolean>(false);
   const spinEdit1ValueRef = useRef<number>(25);
+  const spinEdit2ValueRef = useRef<number>(30);
   const ritLocalRef = useRef<number>(0);
   const edit1Ref = useRef<(() => void) | null>(null); // Function to focus Edit1 TextInput (equivalent to Pascal ActiveControl)
   const edit1TextInputRef = useRef<any>(null); // Actual TextInput ref for selection operations
@@ -2452,6 +2453,8 @@ export const useMainFormHandlers = () => {
   // Keep ref in sync with state
   spinEdit1ValueRef.current = spinEdit1Value;
   const [spinEdit2Value, setSpinEdit2Value] = useState(30);
+  // Keep ref in sync with state
+  spinEdit2ValueRef.current = spinEdit2Value;
   const [spinEdit3Value, setSpinEdit3Value] = useState(3);
   
   // Checkbox controls
@@ -3388,11 +3391,21 @@ export const useMainFormHandlers = () => {
     console.log('SpinEdit1Enter: Focus gained');
   }, []);
 
-  const SpinEdit2Change = useCallback((sender: any) => {
-    console.log('SpinEdit2Change called');
-    // TODO: Implement from Pascal SpinEdit2Change
-    // - Set Ini.Duration = SpinEdit2.Value
-    // - Histo.ReCalc(Ini.Duration)
+  // procedure TMainForm.SpinEdit2Change(Sender: TObject);
+  // begin
+  //   Ini.Duration := SpinEdit2.Value;
+  //   Histo.ReCalc(Ini.Duration);
+  // end;
+  const SpinEdit2Change = useCallback(async (sender: any, newValue?: number) => {
+    // Use provided value if available, otherwise use current state (handles async state updates)
+    const value = newValue !== undefined ? newValue : spinEdit2ValueRef.current;
+    console.log(`SpinEdit2Change called with value=${value}${newValue !== undefined ? ' (provided)' : ' (from ref)'}`);
+    
+    // Set Ini.Duration = SpinEdit2.Value
+    await Ini.Ini.updateSetting('duration', value);
+    
+    // TODO: Call Histo.ReCalc(Ini.Duration) when Histo service is fully implemented
+    // Histo.ReCalc(Ini.Duration);
   }, []);
 
   // procedure TMainForm.SpinEdit3Change(Sender: TObject);

@@ -1204,8 +1204,9 @@ const MainForm: React.FC = () => {
                   style={styles.spinEditButton}
                   onPress={() => {
                     if (handlers.spinEdit2Value > 1) {
-                      handlers.setSpinEdit2Value(handlers.spinEdit2Value - 1);
-                      handlers.SpinEdit2Change(null);
+                      const newValue = handlers.spinEdit2Value - 1;
+                      handlers.setSpinEdit2Value(newValue);
+                      handlers.SpinEdit2Change(null, newValue);
                     }
                   }}
                 >
@@ -1218,7 +1219,7 @@ const MainForm: React.FC = () => {
                     const val = parseInt(text) || 30;
                     if (val >= 1 && val <= 240) {
                       handlers.setSpinEdit2Value(val);
-                      handlers.SpinEdit2Change(null);
+                      handlers.SpinEdit2Change(null, val);
                     }
                   }}
                   keyboardType="numeric"
@@ -1228,8 +1229,9 @@ const MainForm: React.FC = () => {
                   style={styles.spinEditButton}
                   onPress={() => {
                     if (handlers.spinEdit2Value < 240) {
-                      handlers.setSpinEdit2Value(handlers.spinEdit2Value + 1);
-                      handlers.SpinEdit2Change(null);
+                      const newValue = handlers.spinEdit2Value + 1;
+                      handlers.setSpinEdit2Value(newValue);
+                      handlers.SpinEdit2Change(null, newValue);
                     }
                   }}
                 >
