@@ -341,8 +341,6 @@
 //     function SetMyExchange(const AExchange: string) : Boolean;
 //     procedure SetDefaultRunMode(V : Integer);
 //     procedure SetMySerialNR;
-//     procedure SetPitch(PitchNo: integer);
-//     procedure SetBw(BwNo: integer);
 //     procedure UpdateTitleBar;
 //     procedure PostHiScore(const sScore: string);
 //     procedure UpdSerialNR(V: integer {TSerialNRTypes});
@@ -1379,38 +1377,6 @@
 //         Edit3.Left := Edit3.Left - Delta;
 //       end;
 //   end;
-// end;
-
-
-// {
-//   Set pitch based on menu item number.
-//   Must be within range [0, ComboBox1.Items.Count).
-// }
-// procedure TMainForm.SetPitch(PitchNo: integer);
-// begin
-//   PitchNo := Max(0, Min(PitchNo, ComboBox1.Items.Count-1));
-//   Ini.Pitch := 300 + PitchNo * 50;
-//   ComboBox1.ItemIndex := PitchNo;
-//   Tst.Modul.CarrierFreq := Ini.Pitch;
-// end;
-
-
-// {
-//   Set bandwidth based on menu item number.
-//   Must be within range [0, ComboBox2.Items.Count).
-// }
-// procedure TMainForm.SetBw(BwNo: integer);
-// begin
-//   BwNo := Max(0, Min(BwNo, ComboBox2.Items.Count-1));
-//   Ini.Bandwidth := 100 + BwNo * 50;
-//   ComboBox2.ItemIndex := BwNo;
-
-//   Tst.Filt.Points := Round(0.7 * DEFAULTRATE / Ini.BandWidth);
-//   Tst.Filt.GainDb := 10 * Log10(500/Ini.Bandwidth);
-//   Tst.Filt2.Points := Tst.Filt.Points;
-//   Tst.Filt2.GainDb := Tst.Filt.GainDb;
-
-//   UpdateRitIndicator;
 // end;
 
 // procedure TMainForm.SimContestComboChange(Sender: TObject);
@@ -3444,17 +3410,96 @@ export const useMainFormHandlers = () => {
   // EVENT HANDLERS - ComboBox Events
   // ============================================================================
 
-  const ComboBox1Change = useCallback((sender: any) => {
-    console.log('ComboBox1Change called');
-    // TODO: Implement from Pascal ComboBox1Change
-    // - SetPitch(ComboBox1.ItemIndex)
+
+  // {
+  //   Set pitch based on menu item number.
+  //   Must be within range [0, ComboBox1.Items.Count).
+  // }
+  // procedure TMainForm.SetPitch(PitchNo: integer);
+  // begin
+  //   PitchNo := Max(0, Min(PitchNo, ComboBox1.Items.Count-1));
+  //   Ini.Pitch := 300 + PitchNo * 50;
+  //   ComboBox1.ItemIndex := PitchNo;
+  //   Tst.Modul.CarrierFreq := Ini.Pitch;
+  // end;
+  const SetPitch = useCallback(async (pitchNo: number) => {
+    // Clamp PitchNo to valid range [0, comboBox1Items.length-1]
+    const clampedPitchNo = Math.max(0, Math.min(pitchNo, comboBox1Items.length - 1));
+    
+    // Calculate pitch: 300 + PitchNo * 50
+    const pitch = 300 + clampedPitchNo * 50;
+    
+    console.log(`SetPitch: pitchNo=${pitchNo}, clamped=${clampedPitchNo}, pitch=${pitch}Hz`);
+    
+    // Update ComboBox1 index
+    setComboBox1Index(clampedPitchNo);
+    
+    // Update Ini.Pitch
+    await Ini.Ini.updateSetting('pitch', pitch);
+    
+    // TODO: Update Tst.Modul.CarrierFreq when Test/Modul service is fully implemented
+    // Tst.Modul.CarrierFreq := Ini.Pitch;
   }, []);
 
-  const ComboBox2Change = useCallback((sender: any) => {
-    console.log('ComboBox2Change called');
-    // TODO: Implement from Pascal ComboBox2Change
-    // - SetBw(ComboBox2.ItemIndex)
+  // {
+  //   Set bandwidth based on menu item number.
+  //   Must be within range [0, ComboBox2.Items.Count).
+  // }
+  // procedure TMainForm.SetBw(BwNo: integer);
+  // begin
+  //   BwNo := Max(0, Min(BwNo, ComboBox2.Items.Count-1));
+  //   Ini.Bandwidth := 100 + BwNo * 50;
+  //   ComboBox2.ItemIndex := BwNo;
+  //   Tst.Filt.Points := Round(0.7 * DEFAULTRATE / Ini.BandWidth);
+  //   Tst.Filt.GainDb := 10 * Log10(500/Ini.Bandwidth);
+  //   Tst.Filt2.Points := Tst.Filt.Points;
+  //   Tst.Filt2.GainDb := Tst.Filt.GainDb;
+  //   UpdateRitIndicator;
+  // end;
+  const SetBw = useCallback(async (bwNo: number) => {
+    // Clamp BwNo to valid range [0, comboBox2Items.length-1]
+    const clampedBwNo = Math.max(0, Math.min(bwNo, comboBox2Items.length - 1));
+    
+    // Calculate bandwidth: 100 + BwNo * 50
+    const bandwidth = 100 + clampedBwNo * 50;
+    
+    console.log(`SetBw: bwNo=${bwNo}, clamped=${clampedBwNo}, bandwidth=${bandwidth}Hz`);
+    
+    // Update ComboBox2 index
+    setComboBox2Index(clampedBwNo);
+    
+    // Update Ini.Bandwidth (using rxBandwidth in the settings)
+    await Ini.Ini.updateSetting('rxBandwidth', bandwidth);
+    
+    // TODO: Update Tst.Filt when Test/Filt service is fully implemented
+    // Tst.Filt.Points := Round(0.7 * DEFAULTRATE / Ini.BandWidth);
+    // Tst.Filt.GainDb := 10 * Log10(500/Ini.Bandwidth);
+    // Tst.Filt2.Points := Tst.Filt.Points;
+    // Tst.Filt2.GainDb := Tst.Filt.GainDb;
+    // UpdateRitIndicator;
   }, []);
+
+  // procedure TMainForm.ComboBox1Change(Sender: TObject);
+  // begin
+  //   SetPitch(ComboBox1.ItemIndex);
+  // end;
+  const ComboBox1Change = useCallback((sender: any, newIndex?: number) => {
+    // Use provided index if available, otherwise use current state
+    const index = newIndex !== undefined ? newIndex : comboBox1Index;
+    console.log(`ComboBox1Change called with index=${index}`);
+    SetPitch(index);
+  }, [comboBox1Index, SetPitch]);
+
+  // procedure TMainForm.ComboBox2Change(Sender: TObject);
+  // begin
+  //   SetBw(ComboBox2.ItemIndex);
+  // end;
+  const ComboBox2Change = useCallback((sender: any, newIndex?: number) => {
+    // Use provided index if available, otherwise use current state
+    const index = newIndex !== undefined ? newIndex : comboBox2Index;
+    console.log(`ComboBox2Change called with index=${index}`);
+    SetBw(index);
+  }, [comboBox2Index, SetBw]);
 
   const SimContestComboChange = useCallback((sender: any) => {
     console.log('SimContestComboChange called');
@@ -3880,8 +3925,6 @@ export const useMainFormHandlers = () => {
   // - SetDefaultRunMode(V: Integer)
   // - SetMySerialNR()
   // - SetQsk(Value: boolean)
-  // - SetPitch(PitchNo: integer)
-  // - SetBw(BwNo: integer)
   // - UpdateTitleBar()
   // - PostHiScore(const sScore: string)
   // - UpdSerialNR(V: integer)
@@ -3994,6 +4037,10 @@ export const useMainFormHandlers = () => {
     CheckBox1Click,
     CheckBoxClick,
     SetQsk,
+    
+    // Public methods
+    SetPitch,
+    SetBw,
     
     // SpinEdit event handlers
     SpinEdit1Change,

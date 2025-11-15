@@ -552,7 +552,13 @@ const MainForm: React.FC = () => {
   const handlers = useMainFormHandlers();
   const [dropdownButtonLayout, setDropdownButtonLayout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [shape2Layout, setShape2Layout] = useState<{ left: number; width: number } | null>(null);
+  const [comboBox1DropdownVisible, setComboBox1DropdownVisible] = useState(false);
+  const [comboBox2DropdownVisible, setComboBox2DropdownVisible] = useState(false);
+  const [comboBox1Layout, setComboBox1Layout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [comboBox2Layout, setComboBox2Layout] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const buttonContainerRef = useRef<View>(null);
+  const comboBox1Ref = useRef<View>(null);
+  const comboBox2Ref = useRef<View>(null);
   const edit1Ref = useRef<TextInput>(null);
   const edit2Ref = useRef<TextInput>(null);
   const edit3Ref = useRef<TextInput>(null);
@@ -573,6 +579,23 @@ const MainForm: React.FC = () => {
       });
     }
   }, [handlers.runDropdownVisible]);
+
+  // Update combo box positions when dropdowns become visible
+  useEffect(() => {
+    if (comboBox1DropdownVisible && comboBox1Ref.current) {
+      comboBox1Ref.current.measure((x, y, width, height, pageX, pageY) => {
+        setComboBox1Layout({ x: pageX, y: pageY, width, height });
+      });
+    }
+  }, [comboBox1DropdownVisible]);
+
+  useEffect(() => {
+    if (comboBox2DropdownVisible && comboBox2Ref.current) {
+      comboBox2Ref.current.measure((x, y, width, height, pageX, pageY) => {
+        setComboBox2Layout({ x: pageX, y: pageY, width, height });
+      });
+    }
+  }, [comboBox2DropdownVisible]);
 
   return (
     <View style={styles.container}>
@@ -819,10 +842,15 @@ const MainForm: React.FC = () => {
             <View style={styles.stationRow}>
               <Text style={styles.label7}>CW Pitch</Text>
               {/* ComboBox1 - Pitch selection */}
-              <TouchableOpacity style={styles.comboBox}>
+              <TouchableOpacity
+                ref={comboBox1Ref}
+                style={styles.comboBox}
+                onPress={() => setComboBox1DropdownVisible(true)}
+              >
                 <Text style={styles.comboBoxText}>
                   {handlers.comboBox1Items[handlers.comboBox1Index]}
                 </Text>
+                <Text style={styles.comboBoxArrow}>▼</Text>
               </TouchableOpacity>
             </View>
 
@@ -830,10 +858,15 @@ const MainForm: React.FC = () => {
             <View style={styles.stationRow}>
               <Text style={styles.label9}>RX Bandwidth</Text>
               {/* ComboBox2 - Bandwidth selection */}
-              <TouchableOpacity style={styles.comboBox}>
+              <TouchableOpacity
+                ref={comboBox2Ref}
+                style={styles.comboBox}
+                onPress={() => setComboBox2DropdownVisible(true)}
+              >
                 <Text style={styles.comboBoxText}>
                   {handlers.comboBox2Items[handlers.comboBox2Index]}
                 </Text>
+                <Text style={styles.comboBoxArrow}>▼</Text>
               </TouchableOpacity>
             </View>
 
@@ -1052,6 +1085,110 @@ const MainForm: React.FC = () => {
                       >
                         <Text style={styles.runDropdownItemTextDisabled}>Stop</Text>
                       </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* ComboBox1 Dropdown menu - Pitch selection */}
+            <Modal
+              visible={comboBox1DropdownVisible}
+              transparent={true}
+              animationType="none"
+              onRequestClose={() => setComboBox1DropdownVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setComboBox1DropdownVisible(false)}>
+                <View style={styles.modalOverlay}>
+                  {comboBox1Layout && (
+                    <View
+                      style={[
+                        styles.comboBoxDropdownMenu,
+                        {
+                          position: 'absolute',
+                          top: comboBox1Layout.y + comboBox1Layout.height,
+                          left: comboBox1Layout.x,
+                          width: comboBox1Layout.width,
+                        },
+                      ]}
+                      onStartShouldSetResponder={() => true}
+                    >
+                      <ScrollView
+                        style={styles.comboBoxDropdownScrollView}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                      >
+                        {handlers.comboBox1Items.map((item, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.comboBoxDropdownItem,
+                              handlers.comboBox1Index === index && styles.comboBoxDropdownItemSelected,
+                            ]}
+                            onPress={() => {
+                              handlers.ComboBox1Change(null, index);
+                              setComboBox1DropdownVisible(false);
+                            }}
+                          >
+                            <Text style={[
+                              styles.comboBoxDropdownItemText,
+                              handlers.comboBox1Index === index && styles.comboBoxDropdownItemTextSelected,
+                            ]}>{item}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  )}
+                </View>
+              </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* ComboBox2 Dropdown menu - Bandwidth selection */}
+            <Modal
+              visible={comboBox2DropdownVisible}
+              transparent={true}
+              animationType="none"
+              onRequestClose={() => setComboBox2DropdownVisible(false)}
+            >
+              <TouchableWithoutFeedback onPress={() => setComboBox2DropdownVisible(false)}>
+                <View style={styles.modalOverlay}>
+                  {comboBox2Layout && (
+                    <View
+                      style={[
+                        styles.comboBoxDropdownMenu,
+                        {
+                          position: 'absolute',
+                          top: comboBox2Layout.y + comboBox2Layout.height,
+                          left: comboBox2Layout.x,
+                          width: comboBox2Layout.width,
+                        },
+                      ]}
+                      onStartShouldSetResponder={() => true}
+                    >
+                      <ScrollView
+                        style={styles.comboBoxDropdownScrollView}
+                        showsVerticalScrollIndicator={true}
+                        nestedScrollEnabled={true}
+                      >
+                        {handlers.comboBox2Items.map((item, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.comboBoxDropdownItem,
+                              handlers.comboBox2Index === index && styles.comboBoxDropdownItemSelected,
+                            ]}
+                            onPress={() => {
+                              handlers.ComboBox2Change(null, index);
+                              setComboBox2DropdownVisible(false);
+                            }}
+                          >
+                            <Text style={[
+                              styles.comboBoxDropdownItemText,
+                              handlers.comboBox2Index === index && styles.comboBoxDropdownItemTextSelected,
+                            ]}>{item}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </ScrollView>
                     </View>
                   )}
                 </View>
@@ -2022,16 +2159,25 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 23,
     backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
     borderWidth: 1,
     borderColor: '#808080',
-    paddingHorizontal: 4,
-    justifyContent: 'center',
     minWidth: 65,
   },
   comboBoxText: {
     fontSize: 12,
     fontFamily: 'Consolas',
     color: '#000000',
+    flex: 1,
+  },
+  comboBoxArrow: {
+    fontSize: 8,
+    color: '#000000',
+    lineHeight: 8,
+    marginLeft: 4,
   },
   spinEditContainer: {
     flexDirection: 'row',
@@ -2227,6 +2373,39 @@ const styles = StyleSheet.create({
   },
   runDropdownItemTextDisabled: {
     color: '#808080',
+  },
+  comboBoxDropdownMenu: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#808080',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: 200,
+    overflow: 'hidden',
+  },
+  comboBoxDropdownScrollView: {
+    maxHeight: 200,
+  },
+  comboBoxDropdownItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  comboBoxDropdownItemSelected: {
+    backgroundColor: '#ADD8E6', // Light blue
+  },
+  comboBoxDropdownItemText: {
+    fontSize: 12,
+    fontFamily: 'Consolas',
+    color: '#000000',
+  },
+  comboBoxDropdownItemTextSelected: {
+    fontWeight: 'bold',
   },
   durationRow: {
     flexDirection: 'row',
