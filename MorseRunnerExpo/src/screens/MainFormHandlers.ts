@@ -2314,7 +2314,7 @@
 
 
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import * as Station from '../data/Station';
 import * as Ini from '../services/Ini';
 
@@ -2383,6 +2383,37 @@ export const useMainFormHandlers = () => {
   const [runButtonCaption, setRunButtonCaption] = useState<string>('   Run   ');
   const [runDropdownVisible, setRunDropdownVisible] = useState<boolean>(false);
   const [currentRunMode, setCurrentRunMode] = useState<string>('Pile-Up'); // Current selected run mode
+  
+  // Timer state (elapsed seconds)
+  const [timerSeconds, setTimerSeconds] = useState<number>(0);
+  
+  // Timer effect - increments every second when running
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (runButtonDown) {
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+    // When stopped, timer pauses (doesn't reset) - timer value is preserved
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [runButtonDown]);
+  
+  // Format timer as HH:MM:SS
+  const formatTimer = useCallback((seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }, []);
+  
+  const timerDisplay = formatTimer(timerSeconds);
   
   // TODO: Add RecvExchTypes state when types are defined
 
@@ -3212,6 +3243,34 @@ export const useMainFormHandlers = () => {
     SendMsg(msg);
   }, [SendMsg]);
 
+  // procedure TMainForm.Run(Value: TRunMode);
+  // This is the main Run function that starts/stops the contest
+  // The timer is reset here when starting a new run
+  const Run = useCallback((value: string) => {
+    console.log('Run called with mode:', value);
+    
+    if (value === 'Stop') {
+      // Stop the contest
+      setRunButtonDown(false);
+      setRunButtonCaption('   Run   ');
+      setRunDropdownVisible(false);
+      // Timer pauses (doesn't reset) when stopped
+    } else {
+      // Start the contest with specified mode
+      setCurrentRunMode(value);
+      setRunDropdownVisible(false);
+      // TODO: Implement full Run logic from Pascal:
+      // - Validate UserCallsignDirty and UserExchangeDirty
+      // - Call Tst.OnContestPrepareToStart
+      // - Set up UI state (EnableCtl, etc.)
+      // - Start contest simulation
+      setRunButtonDown(true);
+      setRunButtonCaption('Stop');
+      // Reset timer when starting a new run
+      setTimerSeconds(0);
+    }
+  }, []);
+
   // procedure TMainForm.RunBtnClick(Sender: TObject);
   // begin
   //   if RunMode = rmStop then
@@ -3229,19 +3288,13 @@ export const useMainFormHandlers = () => {
       } else {
         // Run with specified mode or current mode
         const runMode = mode || currentRunMode;
-        setCurrentRunMode(runMode);
-        setRunDropdownVisible(false);
-        // TODO: Implement Run(mode) - actual run logic
-        setRunButtonDown(true);
-        setRunButtonCaption('Stop');
+        Run(runMode);
       }
     } else {
       // When running, clicking stops
-      setRunButtonDown(false);
-      setRunButtonCaption('   Run   ');
-      setRunDropdownVisible(false);
+      Run('Stop');
     }
-  }, [runButtonDown, runDropdownVisible, currentRunMode]);
+  }, [runButtonDown, runDropdownVisible, currentRunMode, Run]);
 
   // procedure TMainForm.SetQsk(Value: boolean);
   // begin
@@ -3776,13 +3829,9 @@ export const useMainFormHandlers = () => {
       4: 'HST Competition',
     };
     const mode = modeMap[sender?.tag] || 'Pile-Up';
-    // Inline the run logic (equivalent to handleRunModeSelect)
-    setCurrentRunMode(mode);
-    setRunDropdownVisible(false);
-    // TODO: Implement Run(mode) - actual run logic
-    setRunButtonDown(true);
-    setRunButtonCaption('Stop');
-  }, []);
+    // Call Run function with the selected mode
+    Run(mode);
+  }, [Run]);
 
   // procedure TMainForm.StopMNUClick(Sender: TObject);
   // begin
@@ -3790,12 +3839,9 @@ export const useMainFormHandlers = () => {
   // end;
   const StopMNUClick = useCallback((sender: any) => {
     console.log('StopMNUClick called');
-    // Stop the run
-    setRunButtonDown(false);
-    setRunButtonCaption('   Run   ');
-    setRunDropdownVisible(false);
-    // TODO: Implement Run(rmStop) - actual stop logic
-  }, []);
+    // Call Run function to stop
+    Run('Stop');
+  }, [Run]);
 
   const ViewScoreBoardMNUClick = useCallback((sender: any) => {
     console.log('ViewScoreBoardMNUClick called');
@@ -4038,6 +4084,7 @@ export const useMainFormHandlers = () => {
     runButtonCaption, setRunButtonCaption,
     runDropdownVisible, setRunDropdownVisible,
     currentRunMode, setCurrentRunMode,
+    timerDisplay,
     
     // Form event handlers
     FormCreate,

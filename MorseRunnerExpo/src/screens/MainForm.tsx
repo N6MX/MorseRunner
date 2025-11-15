@@ -1453,7 +1453,7 @@ const MainForm: React.FC = () => {
         {/* Right side: Timer (Panel2) and Score (Panel11) */}
         <View style={styles.panel1Right}>
           <View style={styles.panel2}>
-            <Text style={styles.panel2Text}>00:00:00</Text>
+            <Text style={styles.panel2Text}>{handlers.timerDisplay}</Text>
           </View>
 
           {/* Panel11 - Score Panel with ListView1 */}
