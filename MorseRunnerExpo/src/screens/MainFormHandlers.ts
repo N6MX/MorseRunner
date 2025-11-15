@@ -255,7 +255,6 @@
 //       MousePos: TPoint; var Handled: Boolean);
 //     procedure FormMouseWheelUp(Sender: TObject; Shift: TShiftState;
 //       MousePos: TPoint; var Handled: Boolean);
-//     procedure Edit4Change(Sender: TObject);
 //     procedure ComboBox2Change(Sender: TObject);
 //     procedure ComboBox1Change(Sender: TObject);
 //     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -302,7 +301,6 @@
 //     procedure SimContestComboRefresh;
 //     procedure ExchangeEditChange(Sender: TObject);
 //     procedure ExchangeEditExit(Sender: TObject);
-//     procedure Edit4Exit(Sender: TObject);
 //     procedure SpinEdit1Exit(Sender: TObject);
 
 //   private
@@ -343,8 +341,6 @@
 //     function SetMyExchange(const AExchange: string) : Boolean;
 //     procedure SetDefaultRunMode(V : Integer);
 //     procedure SetMySerialNR;
-//     procedure SetWpm(AWpm : integer);
-//     function SetMyCall(ACall: string) : Boolean;
 //     procedure SetPitch(PitchNo: integer);
 //     procedure SetBw(BwNo: integer);
 //     procedure UpdateTitleBar;
@@ -872,20 +868,6 @@
 //     SetWpm(Wpm - Ini.WpmStepRate);
 // end;
 
-
-// procedure TMainForm.Edit4Change(Sender: TObject);
-// begin
-//   // user callsign edit has occurred; allows SetMyCall to be called.
-//   UserCallsignDirty := True;
-// end;
-
-// procedure TMainForm.Edit4Exit(Sender: TObject);
-// begin
-//   // call SetMyCall if the callsign has been edited
-//   if UserCallsignDirty then
-//     SetMyCall(Trim(Edit4.Text));
-// end;
-
 // procedure TMainForm.ExchangeEditChange(Sender: TObject);
 // begin
 //   // exchange edit callsign edit has occurred; allows SetMyCall to be called.
@@ -1072,37 +1054,6 @@
 // begin
 //   assert(Tst.Me.SentExchTypes.Exch2 = etSerialNr);
 //   SetMyExch2(Tst.Me.SentExchTypes.Exch2, Ini.UserExchange2[SimContest]);
-// end;
-
-
-// function TMainForm.SetMyCall(ACall: string) : Boolean;
-// var
-//   err : string;
-// begin
-//   Ini.Call := ACall;
-//   Edit4.Text := ACall;
-//   Tst.Me.MyCall := ACall;
-
-//   // some contests have contest-specific settings (e.g location local/dx).
-//   // sets Tst.Me.SentExchTypes.
-//   if not Tst.OnSetMyCall(ACall, err) then
-//   begin
-//     MessageDlg(err, mtError, [mbOK], 0);
-//     Result := False;
-//     Exit;
-//   end;
-//   assert(Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, ACall));
-
-//   // update my "sent" exchange information.
-//   // depends on: contest, my call, sent exchange (ExchangeEdit).
-//   // SetMyExchange() may report an error in the status field.
-//   Result := SetMyExchange(Trim(ExchangeEdit.Text));
-
-//   // update "received" Exchange field types, labels and length settings
-//   // (e.g. RST, Nr.). depends on: contest, my call and dx station's call.
-//   ConfigureExchangeFields;
-
-//   UserCallsignDirty := False;
 // end;
 
 // {
@@ -2413,6 +2364,8 @@ export const useMainFormHandlers = () => {
   const userCallsignDirtyRef = useRef<boolean>(false);
   const userExchangeDirtyRef = useRef<boolean>(false);
   const cwSpeedDirtyRef = useRef<boolean>(false);
+  const spinEdit1FocusedRef = useRef<boolean>(false);
+  const spinEdit1ValueRef = useRef<number>(25);
   const ritLocalRef = useRef<number>(0);
   const edit1Ref = useRef<(() => void) | null>(null); // Function to focus Edit1 TextInput (equivalent to Pascal ActiveControl)
   const edit1TextInputRef = useRef<any>(null); // Actual TextInput ref for selection operations
@@ -2530,6 +2483,8 @@ export const useMainFormHandlers = () => {
   
   // SpinEdit controls
   const [spinEdit1Value, setSpinEdit1Value] = useState(25);
+  // Keep ref in sync with state
+  spinEdit1ValueRef.current = spinEdit1Value;
   const [spinEdit2Value, setSpinEdit2Value] = useState(30);
   const [spinEdit3Value, setSpinEdit3Value] = useState(3);
   
@@ -3091,17 +3046,73 @@ export const useMainFormHandlers = () => {
     setCallSent(false);
   }, [edit1Text]);
 
+  // procedure TMainForm.Edit4Change(Sender: TObject);
+  // begin
+  //   // user callsign edit has occurred; allows SetMyCall to be called.
+  //   UserCallsignDirty := True;
+  // end;
   const Edit4Change = useCallback((sender: any) => {
-    console.log('Edit4Change called');
-    // TODO: Implement from Pascal Edit4Change
-    // - Set UserCallsignDirty = true
+    // user callsign edit has occurred; allows SetMyCall to be called.
+    userCallsignDirtyRef.current = true;
   }, []);
 
-  const Edit4Exit = useCallback((sender: any) => {
-    console.log('Edit4Exit called');
-    // TODO: Implement from Pascal Edit4Exit
-    // - Call SetMyCall if UserCallsignDirty
+  // function TMainForm.SetMyCall(ACall: string) : Boolean;
+  // var
+  //   err : string;
+  // begin
+  //   Ini.Call := ACall;
+  //   Edit4.Text := ACall;
+  //   Tst.Me.MyCall := ACall;
+  //
+  //   // some contests have contest-specific settings (e.g location local/dx).
+  //   // sets Tst.Me.SentExchTypes.
+  //   if not Tst.OnSetMyCall(ACall, err) then
+  //   begin
+  //     MessageDlg(err, mtError, [mbOK], 0);
+  //     Result := False;
+  //     Exit;
+  //   end;
+  //   assert(Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, ACall));
+  //
+  //   // update my "sent" exchange information.
+  //   // depends on: contest, my call, sent exchange (ExchangeEdit).
+  //   // SetMyExchange() may report an error in the status field.
+  //   Result := SetMyExchange(Trim(ExchangeEdit.Text));
+  //
+  //   // update "received" Exchange field types, labels and length settings
+  //   // (e.g. RST, Nr.). depends on: contest, my call and dx station's call.
+  //   ConfigureExchangeFields;
+  //
+  //   UserCallsignDirty := False;
+  // end;
+  const SetMyCall = useCallback((aCall: string): boolean => {
+    // TODO: Implement from Pascal SetMyCall
+    // - Update Ini.Call := ACall
+    // - Update Edit4.Text := ACall (already updated via onChangeText)
+    // - Update Tst.Me.MyCall := ACall
+    // - Call Tst.OnSetMyCall(ACall, err) - may return error
+    // - Call SetMyExchange(Trim(ExchangeEdit.Text))
+    // - Call ConfigureExchangeFields
+    // - Clear UserCallsignDirty := False
+    // - Return boolean result
+    console.log('SetMyCall called with:', aCall);
+    userCallsignDirtyRef.current = false;
+    return true;
   }, []);
+
+  // procedure TMainForm.Edit4Exit(Sender: TObject);
+  // begin
+  //   // call SetMyCall if the callsign has been edited
+  //   if UserCallsignDirty then
+  //     SetMyCall(Trim(Edit4.Text));
+  // end;
+  const Edit4Exit = useCallback((sender: any) => {
+    // call SetMyCall if the callsign has been edited
+    if (userCallsignDirtyRef.current) {
+      const trimmedCall = edit4Text.trim();
+      SetMyCall(trimmedCall);
+    }
+  }, [edit4Text, SetMyCall]);
 
   const ExchangeEditChange = useCallback((sender: any) => {
     console.log('ExchangeEditChange called');
@@ -3308,17 +3319,107 @@ export const useMainFormHandlers = () => {
   // EVENT HANDLERS - SpinEdit Events
   // ============================================================================
 
-  const SpinEdit1Change = useCallback((sender: any) => {
-    console.log('SpinEdit1Change called');
-    // TODO: Implement from Pascal SpinEdit1Change
-    // - If focused: set CWSpeedDirty = true
-    // - Else: SetWpm(SpinEdit1.Value)
+  // procedure TMainForm.SetWpm(AWpm : integer);
+  // begin
+  //   Wpm := Max(10, Min(120, AWpm));
+  //   SpinEdit1.Value := Wpm;
+  //   Tst.Me.SetWpm(Wpm);
+  //   CWSpeedDirty := False;
+  // end;
+  const SetWpm = useCallback((aWpm: number) => {
+    // Clamp WPM to valid range (10-120)
+    const clampedWpm = Math.max(10, Math.min(120, aWpm));
+    
+    // Skip update if value hasn't changed
+    if (spinEdit1ValueRef.current === clampedWpm) {
+      console.log(`SetWpm called with ${aWpm}, clamped to ${clampedWpm} - no change needed`);
+      cwSpeedDirtyRef.current = false;
+      return;
+    }
+    
+    console.log(`SetWpm called with ${aWpm}, clamped to ${clampedWpm}`);
+    
+    // Update SpinEdit1 value
+    setSpinEdit1Value(clampedWpm);
+    
+    // TODO: Call Tst.Me.SetWpm(clampedWpm) when Test/Station service is fully implemented
+    // For now, we'll just update the UI value
+    
+    // Clear the dirty flag
+    cwSpeedDirtyRef.current = false;
   }, []);
 
+  // procedure TMainForm.SpinEdit1Change(Sender: TObject);
+  // begin
+  //   if SpinEdit1.Focused then
+  //   begin
+  //     // CW Speed edit has occurred while focus is within the spin edit control.
+  //     // Mark this value as dirty and defer the call to SetWpm until edit is
+  //     // completed by user.
+  //     CWSpeedDirty := True
+  //   end
+  //   else
+  //     SetWpm(SpinEdit1.Value);
+  // end;
+  const SpinEdit1Change = useCallback((sender: any, newValue?: number) => {
+    const isFocused = spinEdit1FocusedRef.current;
+    // Use provided value if available, otherwise use ref (for async state updates)
+    const currentValue = newValue !== undefined ? newValue : spinEdit1ValueRef.current;
+    console.log(`SpinEdit1Change: focused=${isFocused}, value=${currentValue}${newValue !== undefined ? ' (provided)' : ' (from ref)'}`);
+    
+    if (isFocused) {
+      // CW Speed edit has occurred while focus is within the spin edit control.
+      // Mark this value as dirty and defer the call to SetWpm until edit is
+      // completed by user.
+      cwSpeedDirtyRef.current = true;
+      console.log('SpinEdit1Change: Marked as dirty (deferred)');
+    } else {
+      // Not focused, so apply the change immediately
+      // Use provided value or ref to get the current value (handles async state updates)
+      console.log('SpinEdit1Change: Applying immediately (not focused)');
+      SetWpm(currentValue);
+    }
+  }, [SetWpm]);
+
+  // {
+  //   Called when user leaves CW Speed Control or user presses Enter key.
+  // }
+  // procedure TMainForm.SpinEdit1Exit(Sender: TObject);
+  // begin
+  //   // call SetWpm if the CW Speed has been edited
+  //   if CWSpeedDirty then
+  //     SetWpm(SpinEdit1.Value);
+  // end;
   const SpinEdit1Exit = useCallback((sender: any) => {
-    console.log('SpinEdit1Exit called');
-    // TODO: Implement from Pascal SpinEdit1Exit
-    // - If CWSpeedDirty: SetWpm(SpinEdit1.Value)
+    // Clear focus state
+    spinEdit1FocusedRef.current = false;
+    
+    const isDirty = cwSpeedDirtyRef.current;
+    const currentValue = spinEdit1ValueRef.current;
+    console.log(`SpinEdit1Exit: dirty=${isDirty}, value=${currentValue}`);
+    
+    // Always validate and clamp the value on exit, even if not dirty
+    // This ensures values outside 10-120 are corrected
+    const clampedValue = Math.max(10, Math.min(120, currentValue));
+    
+    // If value was outside valid range, update it
+    if (clampedValue !== currentValue) {
+      console.log(`SpinEdit1Exit: Clamping value from ${currentValue} to ${clampedValue}`);
+      setSpinEdit1Value(clampedValue);
+      SetWpm(clampedValue);
+    } else if (isDirty) {
+      // Value is in valid range and was edited, apply it
+      console.log('SpinEdit1Exit: Applying deferred change');
+      SetWpm(currentValue);
+    } else {
+      console.log('SpinEdit1Exit: No changes to apply');
+    }
+  }, [SetWpm]);
+
+  // Handler for when SpinEdit1 gains focus
+  const SpinEdit1Enter = useCallback((sender: any) => {
+    spinEdit1FocusedRef.current = true;
+    console.log('SpinEdit1Enter: Focus gained');
   }, []);
 
   const SpinEdit2Change = useCallback((sender: any) => {
@@ -3779,8 +3880,6 @@ export const useMainFormHandlers = () => {
   // - SetDefaultRunMode(V: Integer)
   // - SetMySerialNR()
   // - SetQsk(Value: boolean)
-  // - SetWpm(AWpm: integer)
-  // - SetMyCall(ACall: string): Boolean
   // - SetPitch(PitchNo: integer)
   // - SetBw(BwNo: integer)
   // - UpdateTitleBar()
@@ -3899,6 +3998,7 @@ export const useMainFormHandlers = () => {
     // SpinEdit event handlers
     SpinEdit1Change,
     SpinEdit1Exit,
+    SpinEdit1Enter,
     SpinEdit2Change,
     SpinEdit3Change,
     

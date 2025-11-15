@@ -755,8 +755,9 @@ const MainForm: React.FC = () => {
                   style={styles.spinEditButton}
                   onPress={() => {
                     if (handlers.spinEdit1Value > 10) {
-                      handlers.setSpinEdit1Value(handlers.spinEdit1Value - 1);
-                      handlers.SpinEdit1Change(null);
+                      const newValue = handlers.spinEdit1Value - 1;
+                      handlers.setSpinEdit1Value(newValue);
+                      handlers.SpinEdit1Change(null, newValue);
                     }
                   }}
                 >
@@ -765,23 +766,46 @@ const MainForm: React.FC = () => {
                 <TextInput
                   style={styles.spinEditInput}
                   value={handlers.spinEdit1Value.toString()}
+                  editable={true}
+                  selectTextOnFocus={true}
                   onChangeText={(text) => {
-                    const val = parseInt(text) || 25;
-                    if (val >= 10 && val <= 120) {
-                      handlers.setSpinEdit1Value(val);
-                      handlers.SpinEdit1Change(null);
+                    console.log(`TextInput onChangeText: "${text}"`);
+                    // Allow empty string - user might be clearing to type new number
+                    if (text === '') {
+                      // Set to a temporary value that will be validated on blur
+                      // Use 0 as placeholder (will be clamped to 10 on blur)
+                      handlers.setSpinEdit1Value(0);
+                      handlers.SpinEdit1Change(null, 0);
+                      return;
                     }
+                    
+                    // Parse the input
+                    const val = parseInt(text, 10);
+                    console.log(`Parsed value: ${val}, isNaN: ${isNaN(val)}`);
+                    
+                    // If it's a valid number, update the value (even if outside 10-120 range during typing)
+                    // We'll clamp it on blur
+                    if (!isNaN(val)) {
+                      handlers.setSpinEdit1Value(val);
+                      handlers.SpinEdit1Change(null, val);
+                    } else {
+                      console.log('Ignoring non-numeric input');
+                    }
+                    // If NaN (e.g., user typed non-numeric), ignore the change
+                    // The controlled value will prevent the invalid character from appearing
                   }}
                   keyboardType="numeric"
                   maxLength={3}
+                  onFocus={handlers.SpinEdit1Enter}
                   onBlur={handlers.SpinEdit1Exit}
                 />
                 <TouchableOpacity
                   style={styles.spinEditButton}
                   onPress={() => {
                     if (handlers.spinEdit1Value < 120) {
-                      handlers.setSpinEdit1Value(handlers.spinEdit1Value + 1);
-                      handlers.SpinEdit1Change(null);
+                      const newValue = handlers.spinEdit1Value + 1;
+                      handlers.setSpinEdit1Value(newValue);
+                      handlers.SpinEdit1Change(null, newValue);
                     }
                   }}
                 >
