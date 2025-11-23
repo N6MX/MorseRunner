@@ -105,6 +105,20 @@ export class Contest {
     }
   }
 
+  // Port from Contest.pas - OnContestPrepareToStart function
+  // Called whenever a contest is started. Loads call history and performs contest-specific setup.
+  async onContestPrepareToStart(userCallsign: string, sentExchange: string): Promise<boolean> {
+    // TODO: Implement full OnContestPrepareToStart logic from Pascal:
+    // - Check if call history reload is required (IsReloadRequired)
+    // - Load contest-specific call history file (LoadCallHistory)
+    // - Perform contest-specific setup
+    // - Return boolean result
+    console.log(`Contest.onContestPrepareToStart called: call=${userCallsign}, exchange=${sentExchange}`);
+    
+    // For now, just load call history
+    return await this.loadCallHistory(userCallsign);
+  }
+
   // Port from Contest.pas - PickStation function
   pickStation(): number {
     if (this.callList.length === 0) return -1;

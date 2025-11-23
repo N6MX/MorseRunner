@@ -338,7 +338,6 @@
 //     procedure PopupScoreHst;
 //     procedure Advance;
 //     procedure SetContest(AContestNum: TSimContest);
-//     function SetMyExchange(const AExchange: string) : Boolean;
 //     procedure SetDefaultRunMode(V : Integer);
 //     procedure SetMySerialNR;
 //     procedure UpdateTitleBar;
@@ -965,63 +964,6 @@
 //   My "sent" exchange types (Tst.Me.SentExchTypes) have been previously set by
 //   SetMyCall().
 
-//   Beginning with ARRL Sweepstakes contest, the exchange will have more than
-//   two values, namely '# A 72 OR'. For the case of ARRL Sweepstakes, we will
-//   break this into two pieces: Exch1='# A', Exch2='72 OR'.
-// }
-// function TMainForm.SetMyExchange(const AExchange: string) : Boolean;
-// var
-//   sl: TStringList;
-//   ExchError: string;
-//   SentExchTypes : TExchTypes;
-// begin
-//   sl:= TStringList.Create;
-//   try
-//     assert(Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, Ini.Call),
-//       'set by TMainForm.SetMyCall');
-//     SentExchTypes := Tst.Me.SentExchTypes;
-
-//     // ValidateMyExchange will parse user-entered exchange and
-//     // return Exch1 and Exch2 tokens.
-//     if not Tst.ValidateMyExchange(AExchange, sl, ExchError) then
-//       begin
-//         Result := False;
-//         DisplayError(ExchError, clRed);
-
-//         // update the Sent Exchange field value
-//         ExchangeEdit.Text := AExchange;
-//         Ini.UserExchangeTbl[SimContest]:= AExchange;
-//         exit;
-//       end
-//     else
-//       begin
-//         Result := True;
-//         sbar.Visible := mnuShowCallsignInfo.Checked;
-//         sbar.Font.Color := clDefault;
-//         sbar.Caption := '';
-//       end;
-
-//     // restore Exchange fields if current contest has changed since last run
-//     if (SimContest <> SavedContest) and (SaveEdit3Left <> 0) then
-//       RestoreRecvFields;
-
-//     // set contest-specific sent exchange values
-//     SetMyExch1(SentExchTypes.Exch1, sl[0]);
-//     SetMyExch2(SentExchTypes.Exch2, sl[1]);
-//     assert(Tst.Me.SentExchTypes = SentExchTypes);
-
-//     // update the Sent Exchange field value
-//     ExchangeEdit.Text := AExchange;
-//     Ini.UserExchangeTbl[SimContest]:= AExchange;
-
-//     // update application's title bar
-//     UpdateTitleBar;
-
-//     UserExchangeDirty := False;
-//   finally
-//     sl.Free;
-//   end;
-// end;
 
 
 // procedure TMainForm.UpdateTitleBar;
@@ -1117,189 +1059,6 @@
 //   Edit3.MaxLength := Exchange2Settings[RecvExchTypes.Exch2].L;
 // end;
 
-// procedure TMainForm.SetMyExch1(const AExchType: TExchange1Type;
-//   const Avalue: string);
-// const
-//   DIGITS = ['0'..'9'];
-// var
-//   L: integer;
-// begin
-//   // Adding a contest: setup contest-specific exchange field 1
-//   case AExchType of
-//     etRST:
-//       begin
-//         // Format('invalid RST (%s)', [AValue]));
-//         Ini.UserExchange1[SimContest] := Avalue;
-//         Tst.Me.RST := StrToInt(Avalue.Replace('E', '5', [rfReplaceAll])
-//                                      .Replace('N', '9', [rfReplaceAll]));
-//         Tst.Me.Exch1 := Avalue;
-//         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
-//       end;
-//     etOpName: // e.g. scCwt (David)
-//       begin
-//         // Format('invalid OpName (%s)', [AValue]));
-//         Ini.HamName:= Avalue;
-//         Ini.UserExchange1[SimContest] := Avalue;
-//         Tst.Me.OpName := Avalue;
-//         Tst.Me.Exch1 := Avalue;
-//         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
-//       end;
-//     etFdClass:  // e.g. scFieldDay (3A)
-//       begin
-//         // 'expecting FD class (3A)'
-//         Ini.ArrlClass := Avalue;
-//         Ini.UserExchange1[SimContest] := Avalue;
-//         Tst.Me.Exch1 := Avalue;
-//         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
-//       end;
-//     etSSNrPrecedence:
-//       begin
-//         // Active during ARRL Sweepstakes contest.
-//         // '#A' | '# A' | '123A' | '123 A' | 'A'
-//         //    --> Exch1 = 'A' | ' A'       // optional leading space
-//         // We want to send what is specified. If they say, '#A', then so space.
-//         // We can can store leading space in Tst.Me.Exch1 = ' A', so strip
-//         // the leading '#' or numeric ('123').
-//         // - pull the leading numeric or '#' and store in NumberStr
-//         // - convert '<nr><prec>' to '<nr>''<prec>'
-//         // - convert '<nr> <prec>' to '<nr>' ' <prec>'
-//         // - insert leading space if count=2
-//         Ini.UserExchange1[SimContest] := Avalue;
-
-//         if Avalue.IsEmpty then
-//           begin
-//             Tst.Me.NR := 1;
-//             Tst.Me.Exch1 := '';
-//           end
-//         else if Avalue[1] = '#' then
-//           begin
-//             // optional leading '#' ('#A' | '# A')
-//             if SerialNR in [snMidContest, snEndContest] then
-//               Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
-//             else
-//               Tst.Me.NR := 1;
-//             L := 2;
-//             if Avalue[L] = ' ' then
-//               while Avalue[L+1] = ' ' do
-//                 Inc(L);
-//             Tst.Me.Exch1 := Avalue.Substring(L-1);
-//           end
-//         else if CharInSet(Avalue[1], DIGITS) then
-//           begin
-//             // optional leading serial number ('123A' | '123 A')
-//             L := 1;
-//             repeat
-//               Inc(L)
-//             until not CharInSet(Avalue[L], DIGITS);
-//             Tst.Me.NR := AValue.Substring(0,L-1).ToInteger;
-//             if Avalue[L] = ' ' then
-//               while Avalue[L+1] = ' ' do
-//                 Inc(L);
-//             Tst.Me.Exch1 := Avalue.Substring(L-1);
-//             if BDebugExchSettings then Edit2.Text := Avalue; // testing only
-//           end
-//         else
-//           begin
-//             // no leading serial number. use assigned serial number behavior.
-//             if SerialNR in [snMidContest, snEndContest] then
-//               Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
-//             else
-//               Tst.Me.NR := 1;
-//             Tst.Me.Exch1 := ' ' + Avalue;
-//           end;
-//         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
-//       end;
-//     else
-//       assert(false, Format('Unsupported exchange 1 type: %s.', [ToStr(AExchType)]));
-//   end;
-//   Tst.Me.SentExchTypes.Exch1 := AExchType;
-// end;
-
-// procedure TMainForm.SetMyExch2(const AExchType: TExchange2Type;
-//   const Avalue: string);
-// begin
-//   assert(RunMode = rmStop);
-//   // Adding a contest: setup contest-specific exchange field 2
-//   case AExchType of
-//     etSerialNr:
-//       begin
-//         var S : String := Avalue.Replace('T', '0', [rfReplaceAll])
-//                                 .Replace('O', '0', [rfReplaceAll])
-//                                 .Replace('N', '9', [rfReplaceAll]);
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         if SimContest = scHST then
-//           Tst.Me.NR := 1
-//         else if S.Contains('#') and (SerialNR in [snMidContest, snEndContest]) then
-//           Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
-//         else if IsNum(S) then
-//           Tst.Me.Nr := S.ToInteger
-//         else
-//           Tst.Me.Nr := 1;
-//         if BDebugExchSettings then Edit3.Text := IntToStr(Tst.Me.Nr);  // testing only
-//       end;
-//     etGenericField, etNaQpExch2, etNaQpNonNaExch2:
-//       begin
-//         // 'expecting alpha-numeric field'
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     etArrlSection:  // e.g. Field Day (OR)
-//       begin
-//         // 'expecting FD section (e.g. OR)'
-//         Ini.ArrlSection := Avalue;
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     etStateProv, etPower:  // e.g. NAQP (OR); ARRLDX (OR | KW)
-//       begin
-//         // 'expecting State or Province (e.g. OR)'
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     etCqZone:
-//       begin
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue;  // testing only
-//       end;
-//     etItuZone:
-//       begin
-//         // 'expecting Itu-Zone or IARU Society'
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     //etAge:
-//     etJaPref:
-//       begin
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     etJaCity:
-//       begin
-//         Ini.UserExchange2[SimContest] := Avalue;
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
-//       end;
-//     etSSCheckSection:
-//       begin
-//         Ini.UserExchange2[SimContest] := Avalue; // <check> <sect> (e.g. 72 OR)
-//         Tst.Me.Exch2 := Avalue;
-//         if BDebugExchSettings then
-//           begin
-//             Edit3.Text := Edit2.Text + ' ' + Avalue;  // testing only
-//             Edit2.Text := '';
-//           end;
-//       end;
-//     else
-//       assert(false, Format('Unsupported exchange 2 type: %s.', [ToStr(AExchType)]));
-//   end;
-//   Tst.Me.SentExchTypes.Exch2 := AExchType;
-// end;
 
 
 // procedure TMainForm.SaveRecvFieldSizes;
@@ -1543,203 +1302,6 @@
 //   Ctl.Enabled := AEnable;
 //   if Ctl is TSpinEdit then (Ctl as TSpinEdit).Color := Clr[AEnable]
 //   else if Ctl is TEdit then (Ctl as TEdit).Color := Clr[AEnable];
-// end;
-
-// procedure TMainForm.Run(Value: TRunMode);
-// const
-//   Mode: array[TRunMode] of string =
-//     ('', 'Pile-Up', 'Single Calls', 'COMPETITION', 'H S T');
-// var
-//   BCompet, BStop: boolean;
-//   //S: string;
-// begin
-//   if Value = Ini.RunMode then
-//     Exit;
-
-//   if Value <> rmStop then
-//   begin
-//     {
-//       consider special case of click Run while focus in CallSign or Exchange
-//       fields.
-
-//       clicking in the Run button does not generate an OnExit event for the
-//       Callsign nor Exchange fields until after the Run button has been processed.
-//       Does this matter? Perhaps not... The contest audio will start before the
-//       Exch1 and Exch2 fields are configured. The first thing sent after hitting
-//       Run is a CQ from the DxStation and this CQ may depend on contest or
-//       user callsign (e.g. ARRL DX controls Exch2).
-//       THE CALLSIGN DOES AFFECT CQ!!!!
-//       However, Exch2 does not affect CQ.
-//       Only the Contest affects the CQ being sent (is this true for all contests?).
-//       If user pushes Enter key after editing either the Exchange or Callsign
-//       fields, then the proper OnEnter/OnExit event is sent for either control.
-//       So I think we are okay if contest is started before dynamic exchange
-//       setup is processed. As long as the CQ message is independent of Exchange
-//       field setup, then we are okay.
-
-//       to simplify this, the dynamic exchange can simply be an ascii-only field.
-//       When QSO is saved to log, we know the calling DX Station and can get
-//       it's sent type. The sent type is our receiving type which can be used
-//       to check the accuracy of the entered QSO.
-//     }
-//     if UserCallsignDirty then
-//        if not SetMyCall(Trim(Edit4.Text)) then
-//          Exit;
-//     if UserExchangeDirty then
-//        if not SetMyExchange(Trim(ExchangeEdit.Text)) then
-//          Exit;
-
-//     // if requesting an HST run, verify the correct contest and serial NR
-//     // mode is selected.
-//     if (Value = rmHst) and
-//        ((SimContest <> scHst) or (Ini.SerialNR <> snStartContest)) then
-//     begin
-//       var S : string :=
-//         'Error: HST Competition mode requires the following settings:'#13 +
-//         '  1. ''HST (High Speed Test)'' in the Contest dropdown.'#13 +
-//         '  2. ''Start of Contest'' in the ''Settings | Serial NR'' menu.'#13 +
-//         'Please correct these settings and try again.';
-//       Application.MessageBox(PChar(S),
-//         'Error',
-//         MB_OK or MB_ICONERROR);
-//       Exit;
-//     end;
-
-//     // load call history and other contest-specific setup before starting
-//     if not Tst.OnContestPrepareToStart(Ini.Call, ExchangeEdit.Text) then
-//       Exit;
-//   end;
-
-//   BStop := Value = rmStop;
-//   BCompet := Value in [rmWpx, rmHst];
-//   RunMode := Value;
-
-//   //debug switches
-//   BDebugExchSettings := (CDebugExchSettings or Ini.DebugExchSettings) and not BCompet;
-//   BDebugCwDecoder := (CDebugCwDecoder or Ini.DebugCwDecoder) and not BCompet;
-//   BDebugGhosting := (CDebugGhosting or Ini.DebugGhosting) and not BCompet;
-
-//   //main ctls
-//   EnableCtl(SimContestCombo, BStop);
-//   EnableCtl(Edit4,  BStop);
-//   EnableCtl(ExchangeEdit, BStop and ActiveContest.ExchFieldEditable);
-//   EnableCtl(SpinEdit2, BStop);
-//   SetToolbuttonDown(ToolButton1, not BStop);
-//   ToolButton1.Caption := IfThen(BStop, 'Run', 'Stop');
-//   ToolButton1.ImageIndex := IfThen(BStop, 0, 10);
-
-//   //condition checkboxes
-//   EnableCtl(CheckBox2, not BCompet);
-//   EnableCtl(CheckBox3, not BCompet);
-//   EnableCtl(CheckBox4, not BCompet);
-//   EnableCtl(CheckBox5, not BCompet);
-//   EnableCtl(CheckBox6, not BCompet);
-//   if RunMode = rmWpx then
-//     begin
-//     CheckBox2.Checked := true;
-//     CheckBox3.Checked := true;
-//     CheckBox4.Checked := true;
-//     CheckBox5.Checked := true;
-//     CheckBox6.Checked := true;
-//     SpinEdit2.Value := CompDuration;
-//     end
-//   else if RunMode = rmHst then
-//     begin
-//     CheckBox2.Checked := false;
-//     CheckBox3.Checked := false;
-//     CheckBox4.Checked := false;
-//     CheckBox5.Checked := false;
-//     CheckBox6.Checked := false;
-//     SpinEdit2.Value := CompDuration;
-//     end;
-
-//   //button menu
-//   PileupMNU.Enabled := BStop;
-//   SingleCallsMNU.Enabled := BStop;
-//   CompetitionMNU.Enabled := BStop;
-//   HSTCompetition1.Enabled := BStop;
-//   StopMNU.Enabled := not BStop;
-
-//   //main menu
-//   PileUp1.Enabled := BStop;
-//   SingleCalls1.Enabled := BStop;
-//   Competition1.Enabled := BStop;
-//   HSTCompetition2.Enabled := BStop;
-//   Stop1MNU.Enabled := not BStop;
-//   ViewScoreTable1.Enabled:= BStop;  // by bg4fqd
-
-//   Call1.Enabled := BStop;
-//   Duration1.Enabled := BStop;
-//   QRN1.Enabled := not BCompet;
-//   QRM1.Enabled := not BCompet;
-//   QSB1.Enabled := not BCompet;
-//   Flutter1.Enabled := not BCompet;
-//   Lids1.Enabled := not BCompet;
-
-//   //hst specific
-//   Activity1.Enabled := Value <> rmHst;
-//   CWBandwidth2.Enabled := Value <> rmHst;
-//   CWMinRxSpeed1.Enabled := Value <> rmHst;
-//   CWMaxRxSpeed1.Enabled := Value <> rmHst;
-//   NRDigits1.Enabled := Value <> rmHst;
-
-//   EnableCtl(SpinEdit3, RunMode <> rmHst);
-//   if RunMode = rmHst then SpinEdit3.Value := 4;
-
-//   EnableCtl(ComboBox2, RunMode <> rmHst);
-//   if RunMode = rmHst then begin ComboBox2.ItemIndex :=10; SetBw(10); end;
-
-//   if RunMode = rmHst then ListView1.Visible := false
-//   else if RunMode <> rmStop then ListView1.Visible := true;
-
-
-//   //mode caption
-//   Panel4.Caption := Mode[Value];
-//   Panel4.Font.Color := IfThen(BCompet, clRed, clGreen);
-
-//   if not BStop then
-//     begin
-//     Tst.Me.AbortSend;
-//     Tst.BlockNumber := 0;
-//     //Tst.Me.Nr := 1;
-//     Log.Clear;
-//     WipeBoxes;
-
-//     RichEdit1.Visible:= false;
-//     RichEdit1.Align:= alNone;
-//     sbar.Align:= alBottom;
-//     sbar.Visible:= mnuShowCallsignInfo.Checked;
-//     ListView2.Align:= alClient;
-//     ListView2.Clear;
-//     ListView2.Visible:= true;
-//     {! ?}
-//     Panel5.Update;
-//     end;
-
-//   if not BStop then
-//     IncRit(0);
-
-//   if BStop then begin
-//     {// save NR back to .INI File.
-//     // todo - there is a better way to this.
-//     if (not BCompet) and
-//       (Self.ExchangeField2Type = etSerialNr) and
-//       (SimContest in [scWpx]) then
-//       begin
-//         S := IntToStr(Tst.Me.NR);
-//         Self.SetMyExch2(etSerialNr, S);
-//       end;
-//       }
-//     if AlWavFile1.IsOpen then
-//       AlWavFile1.Close;
-//   end
-//   else begin
-//     AlWavFile1.FileName := ChangeFileExt(ParamStr(0), '.wav');
-//     if SaveWav then
-//       AlWavFile1.OpenWrite;
-//   end;
-
-//   AlSoundOut1.Enabled := not BStop;
 // end;
 
 // procedure TMainForm.WmTbDown(var Msg: TMessage);
@@ -2317,6 +1879,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import * as Station from '../data/Station';
 import * as Ini from '../services/Ini';
+import * as ContestSimulator from '../services/ContestSimulator';
+import * as ContestManager from '../services/ContestManager';
+import * as Contest from '../data/Contest';
 
 // Constants
 const sVersion = '1.85.3+'; // Sets version strings in UI panel
@@ -3056,6 +2621,512 @@ export const useMainFormHandlers = () => {
     userCallsignDirtyRef.current = true;
   }, []);
 
+  // procedure TMainForm.ExchangeEditChange(Sender: TObject);
+  // begin
+  //   // exchange edit callsign edit has occurred; allows SetMyCall to be called.
+  //   UserExchangeDirty := True;
+  // end;
+  const ExchangeEditChange = useCallback((sender: any) => {
+    // exchange edit has occurred; mark as dirty to allow SetMyExchange to be called on exit
+    userExchangeDirtyRef.current = true;
+    console.log('ExchangeEditChange: Marked as dirty');
+  }, []);
+
+  // procedure TMainForm.SetMyExch1(const AExchType: TExchange1Type;
+  //   const Avalue: string);
+  // const
+  //   DIGITS = ['0'..'9'];
+  // var
+  //   L: integer;
+  // begin
+  //   // Adding a contest: setup contest-specific exchange field 1
+  //   case AExchType of
+  //     etRST:
+  //       begin
+  //         // Format('invalid RST (%s)', [AValue]));
+  //         Ini.UserExchange1[SimContest] := Avalue;
+  //         Tst.Me.RST := StrToInt(Avalue.Replace('E', '5', [rfReplaceAll])
+  //                                      .Replace('N', '9', [rfReplaceAll]));
+  //         Tst.Me.Exch1 := Avalue;
+  //         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
+  //       end;
+  //     etOpName: // e.g. scCwt (David)
+  //       begin
+  //         // Format('invalid OpName (%s)', [AValue]));
+  //         Ini.HamName:= Avalue;
+  //         Ini.UserExchange1[SimContest] := Avalue;
+  //         Tst.Me.OpName := Avalue;
+  //         Tst.Me.Exch1 := Avalue;
+  //         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
+  //       end;
+  //     etFdClass:  // e.g. scFieldDay (3A)
+  //       begin
+  //         // 'expecting FD class (3A)'
+  //         Ini.ArrlClass := Avalue;
+  //         Ini.UserExchange1[SimContest] := Avalue;
+  //         Tst.Me.Exch1 := Avalue;
+  //         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
+  //       end;
+  //     etSSNrPrecedence:
+  //       begin
+  //         // Active during ARRL Sweepstakes contest.
+  //         // '#A' | '# A' | '123A' | '123 A' | 'A'
+  //         //    --> Exch1 = 'A' | ' A'       // optional leading space
+  //         // We want to send what is specified. If they say, '#A', then so space.
+  //         // We can can store leading space in Tst.Me.Exch1 = ' A', so strip
+  //         // the leading '#' or numeric ('123').
+  //         // - pull the leading numeric or '#' and store in NumberStr
+  //         // - convert '<nr><prec>' to '<nr>''<prec>'
+  //         // - convert '<nr> <prec>' to '<nr>' ' <prec>'
+  //         // - insert leading space if count=2
+  //         Ini.UserExchange1[SimContest] := Avalue;
+
+  //         if Avalue.IsEmpty then
+  //           begin
+  //             Tst.Me.NR := 1;
+  //             Tst.Me.Exch1 := '';
+  //           end
+  //         else if Avalue[1] = '#' then
+  //           begin
+  //             // optional leading '#' ('#A' | '# A')
+  //             if SerialNR in [snMidContest, snEndContest] then
+  //               Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
+  //             else
+  //               Tst.Me.NR := 1;
+  //             L := 2;
+  //             if Avalue[L] = ' ' then
+  //               while Avalue[L+1] = ' ' do
+  //                 Inc(L);
+  //             Tst.Me.Exch1 := Avalue.Substring(L-1);
+  //           end
+  //         else if CharInSet(Avalue[1], DIGITS) then
+  //           begin
+  //             // optional leading serial number ('123A' | '123 A')
+  //             L := 1;
+  //             repeat
+  //               Inc(L)
+  //             until not CharInSet(Avalue[L], DIGITS);
+  //             Tst.Me.NR := AValue.Substring(0,L-1).ToInteger;
+  //             if Avalue[L] = ' ' then
+  //               while Avalue[L+1] = ' ' do
+  //                 Inc(L);
+  //             Tst.Me.Exch1 := Avalue.Substring(L-1);
+  //             if BDebugExchSettings then Edit2.Text := Avalue; // testing only
+  //           end
+  //         else
+  //           begin
+  //             // no leading serial number. use assigned serial number behavior.
+  //             if SerialNR in [snMidContest, snEndContest] then
+  //               Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
+  //             else
+  //               Tst.Me.NR := 1;
+  //             Tst.Me.Exch1 := ' ' + Avalue;
+  //           end;
+  //         if BDebugExchSettings then Edit2.Text := Avalue; // testing only
+  //       end;
+  //     else
+  //       assert(false, Format('Unsupported exchange 1 type: %s.', [ToStr(AExchType)]));
+  //   end;
+  //   Tst.Me.SentExchTypes.Exch1 := AExchType;
+  // end;
+  // Port from Pascal SetMyExch1 - sets contest-specific exchange field 1
+  const SetMyExch1 = useCallback((aExchType: Contest.Exchange1Type, aValue: string) => {
+    const currentContest = ContestManager.default.getCurrentContest();
+    if (!currentContest) {
+      console.error('SetMyExch1: No contest selected');
+      return;
+    }
+
+    // Adding a contest: setup contest-specific exchange field 1
+    switch (aExchType) {
+      case Contest.Exchange1Type.RST:
+        // Format RST value (replace E->5, N->9)
+        const rstValue = aValue.replace(/E/gi, '5').replace(/N/gi, '9');
+        const rstNum = parseInt(rstValue, 10);
+        // TODO: Update Ini.UserExchange1[SimContest] when Ini service supports it
+        // TODO: Update Tst.Me.RST and Tst.Me.Exch1 when Station service supports it
+        // TODO: Update Edit2.Text if BDebugExchSettings
+        console.log(`SetMyExch1 RST: ${aValue} -> ${rstNum}`);
+        break;
+
+      case Contest.Exchange1Type.OP_NAME:
+        // TODO: Update Ini.HamName and Ini.UserExchange1[SimContest]
+        // TODO: Update Tst.Me.OpName and Tst.Me.Exch1
+        // TODO: Update Edit2.Text if BDebugExchSettings
+        console.log(`SetMyExch1 OpName: ${aValue}`);
+        break;
+
+      case Contest.Exchange1Type.FD_CLASS:
+        // TODO: Update Ini.ArrlClass and Ini.UserExchange1[SimContest]
+        // TODO: Update Tst.Me.Exch1
+        // TODO: Update Edit2.Text if BDebugExchSettings
+        console.log(`SetMyExch1 FdClass: ${aValue}`);
+        break;
+
+      case Contest.Exchange1Type.SS_NR_PRECEDENCE:
+        // ARRL Sweepstakes: '#A' | '# A' | '123A' | '123 A' | 'A'
+        // TODO: Implement full SS Nr/Precedence parsing logic from Pascal
+        // - Handle leading '#' or numeric serial number
+        // - Extract precedence letter
+        // - Update Tst.Me.NR and Tst.Me.Exch1
+        // TODO: Update Ini.UserExchange1[SimContest]
+        // TODO: Update Edit2.Text if BDebugExchSettings
+        console.log(`SetMyExch1 SS Nr/Precedence: ${aValue}`);
+        break;
+
+      default:
+        console.error(`SetMyExch1: Unsupported exchange 1 type: ${aExchType}`);
+        break;
+    }
+    // TODO: Update Tst.Me.SentExchTypes.Exch1 when Station service supports it
+  }, []);
+
+  // procedure TMainForm.SetMyExch2(const AExchType: TExchange2Type;
+  //   const Avalue: string);
+  // begin
+  //   assert(RunMode = rmStop);
+  //   // Adding a contest: setup contest-specific exchange field 2
+  //   case AExchType of
+  //     etSerialNr:
+  //       begin
+  //         var S : String := Avalue.Replace('T', '0', [rfReplaceAll])
+  //                                 .Replace('O', '0', [rfReplaceAll])
+  //                                 .Replace('N', '9', [rfReplaceAll]);
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         if SimContest = scHST then
+  //           Tst.Me.NR := 1
+  //         else if S.Contains('#') and (SerialNR in [snMidContest, snEndContest]) then
+  //           Tst.Me.NR := 1 + (Tst.GetRandomSerialNR div 10) * 10
+  //         else if IsNum(S) then
+  //           Tst.Me.Nr := S.ToInteger
+  //         else
+  //           Tst.Me.Nr := 1;
+  //         if BDebugExchSettings then Edit3.Text := IntToStr(Tst.Me.Nr);  // testing only
+  //       end;
+  //     etGenericField, etNaQpExch2, etNaQpNonNaExch2:
+  //       begin
+  //         // 'expecting alpha-numeric field'
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     etArrlSection:  // e.g. Field Day (OR)
+  //       begin
+  //         // 'expecting FD section (e.g. OR)'
+  //         Ini.ArrlSection := Avalue;
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     etStateProv, etPower:  // e.g. NAQP (OR); ARRLDX (OR | KW)
+  //       begin
+  //         // 'expecting State or Province (e.g. OR)'
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     etCqZone:
+  //       begin
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue;  // testing only
+  //       end;
+  //     etItuZone:
+  //       begin
+  //         // 'expecting Itu-Zone or IARU Society'
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     //etAge:
+  //     etJaPref:
+  //       begin
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     etJaCity:
+  //       begin
+  //         Ini.UserExchange2[SimContest] := Avalue;
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then Edit3.Text := Avalue; // testing only
+  //       end;
+  //     etSSCheckSection:
+  //       begin
+  //         Ini.UserExchange2[SimContest] := Avalue; // <check> <sect> (e.g. 72 OR)
+  //         Tst.Me.Exch2 := Avalue;
+  //         if BDebugExchSettings then
+  //           begin
+  //             Edit3.Text := Edit2.Text + ' ' + Avalue;  // testing only
+  //             Edit2.Text := '';
+  //           end;
+  //       end;
+  //     else
+  //       assert(false, Format('Unsupported exchange 2 type: %s.', [ToStr(AExchType)]));
+  //   end;
+  //   Tst.Me.SentExchTypes.Exch2 := AExchType;
+  // end;
+  // Port from Pascal SetMyExch2 - sets contest-specific exchange field 2
+  const SetMyExch2 = useCallback((aExchType: Contest.Exchange2Type, aValue: string) => {
+    // assert(RunMode = rmStop) - in Pascal, this should only be called when stopped
+    if (runButtonDown) {
+      console.warn('SetMyExch2: Should only be called when contest is stopped');
+    }
+
+    const currentContest = ContestManager.default.getCurrentContest();
+    if (!currentContest) {
+      console.error('SetMyExch2: No contest selected');
+      return;
+    }
+
+    // Adding a contest: setup contest-specific exchange field 2
+    switch (aExchType) {
+      case Contest.Exchange2Type.SERIAL_NR:
+        // Replace T->0, O->0, N->9
+        const s = aValue.replace(/T/gi, '0').replace(/O/gi, '0').replace(/N/gi, '9');
+        // TODO: Handle SimContest = scHST case
+        // TODO: Handle '#' with SerialNR in [snMidContest, snEndContest]
+        // TODO: Parse numeric value and update Tst.Me.Nr
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 SerialNr: ${aValue} -> ${s}`);
+        break;
+
+      case Contest.Exchange2Type.GENERIC_FIELD:
+      case Contest.Exchange2Type.NAQP_EXCH2:
+      case Contest.Exchange2Type.NAQP_NON_NA_EXCH2:
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 Generic/NaQp: ${aValue}`);
+        break;
+
+      case Contest.Exchange2Type.ARRL_SECTION:
+        // TODO: Update Ini.ArrlSection and Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 ArrlSection: ${aValue}`);
+        break;
+
+      case Contest.Exchange2Type.STATE_PROV:
+      case Contest.Exchange2Type.POWER:
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 StateProv/Power: ${aValue}`);
+        break;
+
+      case Contest.Exchange2Type.CQ_ZONE:
+      case Contest.Exchange2Type.ITU_ZONE:
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 Zone: ${aValue}`);
+        break;
+
+      case Contest.Exchange2Type.JA_PREF:
+      case Contest.Exchange2Type.JA_CITY:
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Update Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 JaPref/City: ${aValue}`);
+        break;
+
+      case Contest.Exchange2Type.SS_CHECK_SECTION:
+        // TODO: Update Ini.UserExchange2[SimContest]
+        // TODO: Update Tst.Me.Exch2
+        // TODO: Special handling for Edit2.Text and Edit3.Text if BDebugExchSettings
+        console.log(`SetMyExch2 SS Check/Section: ${aValue}`);
+        break;
+
+      default:
+        console.error(`SetMyExch2: Unsupported exchange 2 type: ${aExchType}`);
+        break;
+    }
+    // TODO: Update Tst.Me.SentExchTypes.Exch2 when Station service supports it
+  }, [runButtonDown]);
+
+  //   Beginning with ARRL Sweepstakes contest, the exchange will have more than
+  //   two values, namely '# A 72 OR'. For the case of ARRL Sweepstakes, we will
+  //   break this into two pieces: Exch1='# A', Exch2='72 OR'.
+  // }
+  // function TMainForm.SetMyExchange(const AExchange: string) : Boolean;
+  // var
+  //   sl: TStringList;
+  //   ExchError: string;
+  //   SentExchTypes : TExchTypes;
+  // begin
+  //   sl:= TStringList.Create;
+  //   try
+  //     assert(Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, Ini.Call),
+  //       'set by TMainForm.SetMyCall');
+  //     SentExchTypes := Tst.Me.SentExchTypes;
+
+  //     // ValidateMyExchange will parse user-entered exchange and
+  //     // return Exch1 and Exch2 tokens.
+  //     if not Tst.ValidateMyExchange(AExchange, sl, ExchError) then
+  //       begin
+  //         Result := False;
+  //         DisplayError(ExchError, clRed);
+
+  //         // update the Sent Exchange field value
+  //         ExchangeEdit.Text := AExchange;
+  //         Ini.UserExchangeTbl[SimContest]:= AExchange;
+  //         exit;
+  //       end
+  //     else
+  //       begin
+  //         Result := True;
+  //         sbar.Visible := mnuShowCallsignInfo.Checked;
+  //         sbar.Font.Color := clDefault;
+  //         sbar.Caption := '';
+  //       end;
+
+  //     // restore Exchange fields if current contest has changed since last run
+  //     if (SimContest <> SavedContest) and (SaveEdit3Left <> 0) then
+  //       RestoreRecvFields;
+
+  //     // set contest-specific sent exchange values
+  //     SetMyExch1(SentExchTypes.Exch1, sl[0]);
+  //     SetMyExch2(SentExchTypes.Exch2, sl[1]);
+  //     assert(Tst.Me.SentExchTypes = SentExchTypes);
+
+  //     // update the Sent Exchange field value
+  //     ExchangeEdit.Text := AExchange;
+  //     Ini.UserExchangeTbl[SimContest]:= AExchange;
+
+  //     // update application's title bar
+  //     UpdateTitleBar;
+
+  //     UserExchangeDirty := False;
+  //   finally
+  //     sl.Free;
+  //   end;
+  // end;
+  // Port from Pascal SetMyExchange - validates and sets user's sent exchange
+  const SetMyExchange = useCallback((aExchange: string): boolean => {
+    const currentContest = ContestManager.default.getCurrentContest();
+    if (!currentContest) {
+      console.error('SetMyExchange: No contest selected');
+      userExchangeDirtyRef.current = false;
+      return false;
+    }
+
+    const trimmedExchange = aExchange.trim();
+    
+    // TODO: Get SentExchTypes from contest/station when available
+    // assert(Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, Ini.Call))
+    // const sentExchTypes = currentContest.getSentExchTypes(...);
+
+    // Parse exchange into tokens (Exch1 and Exch2)
+    const tokens = trimmedExchange.split(/\s+/);
+    const exch1 = tokens[0] || '';
+    const exch2 = tokens[1] || '';
+
+    // TODO: Validate exchange using Tst.ValidateMyExchange
+    // For now, basic validation - check that we have at least one token
+    if (trimmedExchange === '') {
+      setSbarCaption('Invalid exchange: expecting exchange value');
+      setSbarVisible(true);
+      setExchangeEditText(trimmedExchange);
+      // TODO: Update Ini.UserExchangeTbl[SimContest]
+      userExchangeDirtyRef.current = false;
+      return false;
+    }
+
+    // TODO: Call Tst.ValidateMyExchange when available
+    // if (!currentContest.validateMyExchange(trimmedExchange, tokens, exchError)) {
+    //   DisplayError(exchError, clRed);
+    //   setExchangeEditText(trimmedExchange);
+    //   // TODO: Update Ini.UserExchangeTbl[SimContest]
+    //   return false;
+    // }
+
+    // Clear error status
+    setSbarVisible(true);
+    setSbarCaption('');
+
+    // TODO: Restore Exchange fields if current contest has changed since last run
+    // if (SimContest !== SavedContest && SaveEdit3Left !== 0) {
+    //   RestoreRecvFields();
+    // }
+
+    // Get exchange types from contest (stub for now)
+    // TODO: Get actual SentExchTypes from contest/station
+    const exch1Type = currentContest.exchangeType1;
+    const exch2Type = currentContest.exchangeType2;
+
+    // Set contest-specific sent exchange values
+    SetMyExch1(exch1Type, exch1);
+    SetMyExch2(exch2Type, exch2);
+
+    // Update the Sent Exchange field value
+    setExchangeEditText(trimmedExchange);
+    // TODO: Update Ini.UserExchangeTbl[SimContest]
+
+    // TODO: Update application's title bar
+    // UpdateTitleBar();
+
+    userExchangeDirtyRef.current = false;
+    return true;
+  }, [SetMyExch1, SetMyExch2]);
+
+  // procedure TMainForm.ExchangeEditExit(Sender: TObject);
+  // begin
+  //   if UserExchangeDirty then
+  //     SetMyExchange(Trim(ExchangeEdit.Text));
+  // end;
+  const ExchangeEditExit = useCallback((sender: any) => {
+    const isDirty = userExchangeDirtyRef.current;
+    const trimmedExchange = exchangeEditText.trim();
+    console.log(`ExchangeEditExit: dirty=${isDirty}, exchange="${trimmedExchange}"`);
+    
+    // Call SetMyExchange if the exchange has been edited
+    if (isDirty) {
+      console.log('ExchangeEditExit: Calling SetMyExchange');
+      SetMyExchange(trimmedExchange);
+    } else {
+      console.log('ExchangeEditExit: No changes to apply');
+    }
+  }, [exchangeEditText, SetMyExchange]);
+
+  // procedure TMainForm.ConfigureExchangeFields;
+  // Port from Pascal ConfigureExchangeFields - configures received exchange field types, labels and lengths
+  const ConfigureExchangeFields = useCallback(() => {
+    const currentContest = ContestManager.default.getCurrentContest();
+    if (!currentContest) {
+      console.error('ConfigureExchangeFields: No contest selected');
+      return;
+    }
+
+    // TODO: Load Received exchange field types
+    // RecvExchTypes := Tst.GetRecvExchTypes(skMyStation, Tst.Me.MyCall, Trim(Edit1.Text));
+    // For now, use contest's default exchange types
+    const recvExch1Type = currentContest.exchangeType1;
+    const recvExch2Type = currentContest.exchangeType2;
+
+    // TODO: Apply contest-specific exchange field sizing and positioning
+    // ResizeRecvFields();
+
+    // TODO: Set Exchange label and field visibility
+    // Label17.Visible := AExchangeLabel !== '';
+    // ExchangeEdit.Visible := AExchangeLabel !== '';
+    // Label17.Caption := AExchangeLabel;
+
+    // TODO: Set Exchange field editable state
+    // ExchangeEdit.Enabled := ActiveContest.ExchFieldEditable;
+
+    // TODO: Setup Exchange Field 1 (e.g. RST) - label and max length
+    // Label2.Caption := Exchange1Settings[RecvExchTypes.Exch1].C;
+    // Edit2.MaxLength := Exchange1Settings[RecvExchTypes.Exch1].L;
+
+    // TODO: Setup Exchange Field 2 (e.g. Serial #) - label and max length
+    // Label3.Caption := Exchange2Settings[RecvExchTypes.Exch2].C;
+    // Edit3.MaxLength := Exchange2Settings[RecvExchTypes.Exch2].L;
+
+    console.log(`ConfigureExchangeFields: Exch1=${recvExch1Type}, Exch2=${recvExch2Type}`);
+  }, []);
+
   // function TMainForm.SetMyCall(ACall: string) : Boolean;
   // var
   //   err : string;
@@ -3086,19 +3157,55 @@ export const useMainFormHandlers = () => {
   //   UserCallsignDirty := False;
   // end;
   const SetMyCall = useCallback((aCall: string): boolean => {
-    // TODO: Implement from Pascal SetMyCall
-    // - Update Ini.Call := ACall
-    // - Update Edit4.Text := ACall (already updated via onChangeText)
-    // - Update Tst.Me.MyCall := ACall
-    // - Call Tst.OnSetMyCall(ACall, err) - may return error
-    // - Call SetMyExchange(Trim(ExchangeEdit.Text))
-    // - Call ConfigureExchangeFields
-    // - Clear UserCallsignDirty := False
-    // - Return boolean result
-    console.log('SetMyCall called with:', aCall);
+    const trimmedCall = aCall.trim();
+    if (trimmedCall === '') {
+      console.error('SetMyCall: Empty callsign');
+      return false;
+    }
+
+    // TODO: Update Ini.Call := ACall
+    // Ini.default.setCall(trimmedCall);
+
+    // Edit4.Text is already updated via onChangeText, so we don't need to set it
+
+    const currentContest = ContestManager.default.getCurrentContest();
+    if (!currentContest) {
+      console.error('SetMyCall: No contest selected');
+      userCallsignDirtyRef.current = false;
+      return false;
+    }
+
+    // TODO: Update Tst.Me.MyCall := ACall
+    // currentContest.setMyCall(trimmedCall);
+
+    // TODO: Call Tst.OnSetMyCall(ACall, err) - may return error
+    // const err = '';
+    // if (!currentContest.onSetMyCall(trimmedCall, err)) {
+    //   // Display error message
+    //   console.error('SetMyCall error:', err);
+    //   return false;
+    // }
+
+    // TODO: Assert Tst.Me.SentExchTypes = Tst.GetSentExchTypes(skMyStation, ACall)
+    // const sentExchTypes = currentContest.getSentExchTypes(...);
+    // assert(sentExchTypes matches expected types);
+
+    // Update my "sent" exchange information
+    // SetMyExchange() may report an error in the status field
+    const exchangeText = exchangeEditText.trim();
+    const exchangeResult = SetMyExchange(exchangeText);
+    if (!exchangeResult) {
+      console.error('SetMyCall: SetMyExchange failed');
+      userCallsignDirtyRef.current = false;
+      return false;
+    }
+
+    // Update "received" Exchange field types, labels and length settings
+    ConfigureExchangeFields();
+
     userCallsignDirtyRef.current = false;
     return true;
-  }, []);
+  }, [exchangeEditText, SetMyExchange, ConfigureExchangeFields]);
 
   // procedure TMainForm.Edit4Exit(Sender: TObject);
   // begin
@@ -3114,38 +3221,28 @@ export const useMainFormHandlers = () => {
     }
   }, [edit4Text, SetMyCall]);
 
-  // procedure TMainForm.ExchangeEditChange(Sender: TObject);
-  // begin
-  //   // exchange edit callsign edit has occurred; allows SetMyCall to be called.
-  //   UserExchangeDirty := True;
-  // end;
-  const ExchangeEditChange = useCallback((sender: any) => {
-    // exchange edit has occurred; mark as dirty to allow SetMyExchange to be called on exit
-    userExchangeDirtyRef.current = true;
-    console.log('ExchangeEditChange: Marked as dirty');
-  }, []);
-
-  // procedure TMainForm.ExchangeEditExit(Sender: TObject);
-  // begin
-  //   if UserExchangeDirty then
-  //     SetMyExchange(Trim(ExchangeEdit.Text));
-  // end;
-  const ExchangeEditExit = useCallback((sender: any) => {
-    const isDirty = userExchangeDirtyRef.current;
-    const trimmedExchange = exchangeEditText.trim();
-    console.log(`ExchangeEditExit: dirty=${isDirty}, exchange="${trimmedExchange}"`);
+  // procedure TMainForm.EnableCtl(Ctl: TWinControl; AEnable: boolean);
+  // Enables/disables a control and updates its visual appearance
+  const EnableCtl = useCallback((ctlId: string, aEnable: boolean) => {
+    // TODO: Implement full EnableCtl logic from Pascal:
+    // - Enable/disable the control based on ctlId
+    // - Update control color based on enabled state (clBtnFace when disabled, clWindow when enabled)
+    // - Handle different control types (TSpinEdit, TEdit, etc.)
     
-    // Call SetMyExchange if the exchange has been edited
-    if (isDirty) {
-      console.log('ExchangeEditExit: Calling SetMyExchange');
-      // TODO: Implement SetMyExchange when it's available
-      // SetMyExchange(trimmedExchange);
-      // For now, just clear the dirty flag
-      userExchangeDirtyRef.current = false;
-    } else {
-      console.log('ExchangeEditExit: No changes to apply');
-    }
-  }, [exchangeEditText]);
+    // For now, this is a stub - UI state management will be handled by React state
+    // In React Native, controls are typically disabled via the `editable` or `enabled` prop
+    // and styling is handled via StyleSheet
+    
+    console.log(`EnableCtl: ${ctlId}, enabled: ${aEnable}`);
+    
+    // TODO: Map ctlId to actual control state setters when UI components are available
+    // Example mappings:
+    // - 'SimContestCombo' -> setSimContestComboEnabled(aEnable)
+    // - 'Edit4' -> setEdit4Enabled(aEnable)
+    // - 'ExchangeEdit' -> setExchangeEditEnabled(aEnable)
+    // - 'SpinEdit2' -> setSpinEdit2Enabled(aEnable)
+    // etc.
+  }, []);
 
   // ============================================================================
   // EVENT HANDLERS - Button Events
@@ -3244,9 +3341,202 @@ export const useMainFormHandlers = () => {
   }, [SendMsg]);
 
   // procedure TMainForm.Run(Value: TRunMode);
-  // This is the main Run function that starts/stops the contest
-  // The timer is reset here when starting a new run
-  const Run = useCallback((value: string) => {
+  // const
+  //   Mode: array[TRunMode] of string =
+  //     ('', 'Pile-Up', 'Single Calls', 'COMPETITION', 'H S T');
+  // var
+  //   BCompet, BStop: boolean;
+  //   //S: string;
+  // begin
+  //   if Value = Ini.RunMode then
+  //     Exit;
+
+  //   if Value <> rmStop then
+  //   begin
+  //     {
+  //       consider special case of click Run while focus in CallSign or Exchange
+  //       fields.
+
+  //       clicking in the Run button does not generate an OnExit event for the
+  //       Callsign nor Exchange fields until after the Run button has been processed.
+  //       Does this matter? Perhaps not... The contest audio will start before the
+  //       Exch1 and Exch2 fields are configured. The first thing sent after hitting
+  //       Run is a CQ from the DxStation and this CQ may depend on contest or
+  //       user callsign (e.g. ARRL DX controls Exch2).
+  //       THE CALLSIGN DOES AFFECT CQ!!!!
+  //       However, Exch2 does not affect CQ.
+  //       Only the Contest affects the CQ being sent (is this true for all contests?).
+  //       If user pushes Enter key after editing either the Exchange or Callsign
+  //       fields, then the proper OnEnter/OnExit event is sent for either control.
+  //       So I think we are okay if contest is started before dynamic exchange
+  //       setup is processed. As long as the CQ message is independent of Exchange
+  //       field setup, then we are okay.
+
+  //       to simplify this, the dynamic exchange can simply be an ascii-only field.
+  //       When QSO is saved to log, we know the calling DX Station and can get
+  //       it's sent type. The sent type is our receiving type which can be used
+  //       to check the accuracy of the entered QSO.
+  //     }
+  //     if UserCallsignDirty then
+  //        if not SetMyCall(Trim(Edit4.Text)) then
+  //          Exit;
+  //     if UserExchangeDirty then
+  //        if not SetMyExchange(Trim(ExchangeEdit.Text)) then
+  //          Exit;
+
+  //     // if requesting an HST run, verify the correct contest and serial NR
+  //     // mode is selected.
+  //     if (Value = rmHst) and
+  //        ((SimContest <> scHst) or (Ini.SerialNR <> snStartContest)) then
+  //     begin
+  //       var S : string :=
+  //         'Error: HST Competition mode requires the following settings:'#13 +
+  //         '  1. ''HST (High Speed Test)'' in the Contest dropdown.'#13 +
+  //         '  2. ''Start of Contest'' in the ''Settings | Serial NR'' menu.'#13 +
+  //         'Please correct these settings and try again.';
+  //       Application.MessageBox(PChar(S),
+  //         'Error',
+  //         MB_OK or MB_ICONERROR);
+  //       Exit;
+  //     end;
+
+  //     // load call history and other contest-specific setup before starting
+  //     if not Tst.OnContestPrepareToStart(Ini.Call, ExchangeEdit.Text) then
+  //       Exit;
+  //   end;
+
+  //   BStop := Value = rmStop;
+  //   BCompet := Value in [rmWpx, rmHst];
+  //   RunMode := Value;
+
+  //   //debug switches
+  //   BDebugExchSettings := (CDebugExchSettings or Ini.DebugExchSettings) and not BCompet;
+  //   BDebugCwDecoder := (CDebugCwDecoder or Ini.DebugCwDecoder) and not BCompet;
+  //   BDebugGhosting := (CDebugGhosting or Ini.DebugGhosting) and not BCompet;
+
+  //   //main ctls
+  //   EnableCtl(SimContestCombo, BStop);
+  //   EnableCtl(Edit4,  BStop);
+  //   EnableCtl(ExchangeEdit, BStop and ActiveContest.ExchFieldEditable);
+  //   EnableCtl(SpinEdit2, BStop);
+  //   SetToolbuttonDown(ToolButton1, not BStop);
+  //   ToolButton1.Caption := IfThen(BStop, 'Run', 'Stop');
+  //   ToolButton1.ImageIndex := IfThen(BStop, 0, 10);
+
+  //   //condition checkboxes
+  //   EnableCtl(CheckBox2, not BCompet);
+  //   EnableCtl(CheckBox3, not BCompet);
+  //   EnableCtl(CheckBox4, not BCompet);
+  //   EnableCtl(CheckBox5, not BCompet);
+  //   EnableCtl(CheckBox6, not BCompet);
+  //   if RunMode = rmWpx then
+  //     begin
+  //     CheckBox2.Checked := true;
+  //     CheckBox3.Checked := true;
+  //     CheckBox4.Checked := true;
+  //     CheckBox5.Checked := true;
+  //     CheckBox6.Checked := true;
+  //     SpinEdit2.Value := CompDuration;
+  //     end
+  //   else if RunMode = rmHst then
+  //     begin
+  //     CheckBox2.Checked := false;
+  //     CheckBox3.Checked := false;
+  //     CheckBox4.Checked := false;
+  //     CheckBox5.Checked := false;
+  //     CheckBox6.Checked := false;
+  //     SpinEdit2.Value := CompDuration;
+  //     end;
+
+  //   //button menu
+  //   PileupMNU.Enabled := BStop;
+  //   SingleCallsMNU.Enabled := BStop;
+  //   CompetitionMNU.Enabled := BStop;
+  //   HSTCompetition1.Enabled := BStop;
+  //   StopMNU.Enabled := not BStop;
+
+  //   //main menu
+  //   PileUp1.Enabled := BStop;
+  //   SingleCalls1.Enabled := BStop;
+  //   Competition1.Enabled := BStop;
+  //   HSTCompetition2.Enabled := BStop;
+  //   Stop1MNU.Enabled := not BStop;
+  //   ViewScoreTable1.Enabled:= BStop;  // by bg4fqd
+
+  //   Call1.Enabled := BStop;
+  //   Duration1.Enabled := BStop;
+  //   QRN1.Enabled := not BCompet;
+  //   QRM1.Enabled := not BCompet;
+  //   QSB1.Enabled := not BCompet;
+  //   Flutter1.Enabled := not BCompet;
+  //   Lids1.Enabled := not BCompet;
+
+  //   //hst specific
+  //   Activity1.Enabled := Value <> rmHst;
+  //   CWBandwidth2.Enabled := Value <> rmHst;
+  //   CWMinRxSpeed1.Enabled := Value <> rmHst;
+  //   CWMaxRxSpeed1.Enabled := Value <> rmHst;
+  //   NRDigits1.Enabled := Value <> rmHst;
+
+  //   EnableCtl(SpinEdit3, RunMode <> rmHst);
+  //   if RunMode = rmHst then SpinEdit3.Value := 4;
+
+  //   EnableCtl(ComboBox2, RunMode <> rmHst);
+  //   if RunMode = rmHst then begin ComboBox2.ItemIndex :=10; SetBw(10); end;
+
+  //   if RunMode = rmHst then ListView1.Visible := false
+  //   else if RunMode <> rmStop then ListView1.Visible := true;
+
+
+  //   //mode caption
+  //   Panel4.Caption := Mode[Value];
+  //   Panel4.Font.Color := IfThen(BCompet, clRed, clGreen);
+
+  //   if not BStop then
+  //     begin
+  //     Tst.Me.AbortSend;
+  //     Tst.BlockNumber := 0;
+  //     //Tst.Me.Nr := 1;
+  //     Log.Clear;
+  //     WipeBoxes;
+
+  //     RichEdit1.Visible:= false;
+  //     RichEdit1.Align:= alNone;
+  //     sbar.Align:= alBottom;
+  //     sbar.Visible:= mnuShowCallsignInfo.Checked;
+  //     ListView2.Align:= alClient;
+  //     ListView2.Clear;
+  //     ListView2.Visible:= true;
+  //     {! ?}
+  //     Panel5.Update;
+  //     end;
+
+  //   if not BStop then
+  //     IncRit(0);
+
+  //   if BStop then begin
+  //     {// save NR back to .INI File.
+  //     // todo - there is a better way to this.
+  //     if (not BCompet) and
+  //       (Self.ExchangeField2Type = etSerialNr) and
+  //       (SimContest in [scWpx]) then
+  //       begin
+  //         S := IntToStr(Tst.Me.NR);
+  //         Self.SetMyExch2(etSerialNr, S);
+  //       end;
+  //       }
+  //     if AlWavFile1.IsOpen then
+  //       AlWavFile1.Close;
+  //   end
+  //   else begin
+  //     AlWavFile1.FileName := ChangeFileExt(ParamStr(0), '.wav');
+  //     if SaveWav then
+  //       AlWavFile1.OpenWrite;
+  //   end;
+
+  //   AlSoundOut1.Enabled := not BStop;
+  // end;
+  const Run = useCallback(async (value: string) => {
     console.log('Run called with mode:', value);
     
     if (value === 'Stop') {
@@ -3255,21 +3545,63 @@ export const useMainFormHandlers = () => {
       setRunButtonCaption('   Run   ');
       setRunDropdownVisible(false);
       // Timer pauses (doesn't reset) when stopped
+      // TODO: Stop contest simulation
+      await ContestSimulator.default.stopContest();
     } else {
       // Start the contest with specified mode
       setCurrentRunMode(value);
       setRunDropdownVisible(false);
-      // TODO: Implement full Run logic from Pascal:
-      // - Validate UserCallsignDirty and UserExchangeDirty
-      // - Call Tst.OnContestPrepareToStart
-      // - Set up UI state (EnableCtl, etc.)
-      // - Start contest simulation
+      
+      // Validate UserCallsignDirty and UserExchangeDirty
+      if (userCallsignDirtyRef.current) {
+        const trimmedCall = edit4Text.trim();
+        if (!SetMyCall(trimmedCall)) {
+          console.error('SetMyCall failed - aborting contest start');
+          return;
+        }
+      }
+      
+      if (userExchangeDirtyRef.current) {
+        const trimmedExchange = exchangeEditText.trim();
+        if (!SetMyExchange(trimmedExchange)) {
+          console.error('SetMyExchange failed - aborting contest start');
+          return;
+        }
+      }
+      
+      // Call Tst.OnContestPrepareToStart (via contest instance)
+      const userCallsign = edit4Text.trim();
+      const sentExchange = exchangeEditText.trim();
+      const currentContest = ContestManager.default.getCurrentContest();
+      if (!currentContest) {
+        console.error('No contest selected - aborting contest start');
+        return;
+      }
+      const prepareSuccess = await currentContest.onContestPrepareToStart(userCallsign, sentExchange);
+      if (!prepareSuccess) {
+        console.error('OnContestPrepareToStart failed - aborting contest start');
+        return;
+      }
+      
+      // Set up UI state (EnableCtl, etc.)
+      const bStop = false; // Not stopping, so controls should be disabled
+      EnableCtl('SimContestCombo', bStop);
+      EnableCtl('Edit4', bStop);
+      EnableCtl('ExchangeEdit', bStop);
+      EnableCtl('SpinEdit2', bStop);
+      // TODO: Enable/disable additional controls as needed
+      
+      // Start contest simulation
+      const contestType = 'wpx'; // TODO: Get from current contest selection
+      const activity = spinEdit3Value; // TODO: Map activity value appropriately
+      await ContestSimulator.default.startContest(contestType, userCallsign, activity);
+      
       setRunButtonDown(true);
       setRunButtonCaption('Stop');
       // Reset timer when starting a new run
       setTimerSeconds(0);
     }
-  }, []);
+  }, [edit4Text, exchangeEditText, SetMyCall, SetMyExchange, EnableCtl, spinEdit3Value]);
 
   // procedure TMainForm.RunBtnClick(Sender: TObject);
   // begin
